@@ -60,7 +60,7 @@ chess_club/
 
 1. **Clone the repository**
    ```bash
-   git clone git@github.com:Amani-ojo/-Chess-Club.git
+   git clone https://github.com/Amani-ojo/-Chess-Club.git
    cd -Chess-Club
    ```
 
