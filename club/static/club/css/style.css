@@ -1,0 +1,982 @@
+/* ============================================================
+   ESCHEN CHESS CLUB — Custom Stylesheet
+   ============================================================
+   This CSS file styles the entire Chess Club website.
+   It works together with Bootstrap 5 for layout and components.
+   ============================================================ */
+
+
+/* ==================== CSS VARIABLES ==================== */
+/* These variables define the colour palette used across the site */
+:root {
+    --color-gold: #c9a84c;
+    --color-gold-light: #e8d48b;
+    --color-gold-dark: #a08030;
+    --color-dark: #1a1a2e;
+    --color-dark-lighter: #16213e;
+    --color-dark-card: #0f3460;
+    --color-white: #ffffff;
+    --color-light-bg: #f8f9fa;
+    --color-text: #333333;
+    --color-green: #28a745;
+    --color-red: #dc3545;
+    --color-blue: #0d6efd;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+
+/* ==================== GLOBAL STYLES ==================== */
+/* Base styles applied to all elements on every page */
+body {
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background-color: var(--color-white);
+    padding-top: 76px; /* Space for the fixed navbar */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+a {
+    color: var(--color-gold-dark);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--color-gold);
+}
+
+
+/* ==================== NAVIGATION BAR ==================== */
+/* The fixed top navbar with dark background and gold accents */
+.navbar {
+    background-color: var(--color-dark);
+    padding: 1rem 0;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.brand-icon {
+    font-size: 2rem;
+    margin-right: 10px;
+    color: var(--color-gold);
+}
+
+.brand-text {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-white);
+}
+
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    margin: 0 0.2rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.navbar .nav-link:hover {
+    color: var(--color-gold);
+    background-color: rgba(201, 168, 76, 0.1);
+}
+
+.navbar .nav-link i {
+    margin-right: 5px;
+}
+
+
+/* ==================== HERO SECTION (HOME PAGE) ==================== */
+/* The large banner area at the top of the home page */
+.hero-section {
+    position: relative;
+    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-dark-lighter) 50%, var(--color-dark-card) 100%);
+    padding: 120px 0 100px;
+    overflow: hidden;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.5;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--color-white);
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--color-gold);
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.hero-description {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 600px;
+    margin: 0 auto 30px;
+    line-height: 1.7;
+}
+
+.hero-chess-pieces {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    color: rgba(201, 168, 76, 0.15);
+    letter-spacing: 20px;
+}
+
+
+/* ==================== BUTTONS ==================== */
+/* Custom button styles — the gold button is the primary CTA */
+.btn-gold {
+    background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+    color: var(--color-white);
+    border: none;
+    font-weight: 600;
+    padding: 12px 30px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(201, 168, 76, 0.3);
+}
+
+.btn-gold:hover {
+    background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+    color: var(--color-white);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
+}
+
+
+/* ==================== SECTION STYLES ==================== */
+/* Reusable section padding and headers used on every page */
+.section-padding {
+    padding: 80px 0;
+}
+
+.section-header {
+    margin-bottom: 50px;
+}
+
+.section-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    color: #777;
+}
+
+
+/* ==================== PAGE HEADER ==================== */
+/* The coloured banner at the top of each interior page */
+.page-header {
+    background: linear-gradient(135deg, var(--color-dark), var(--color-dark-card));
+    padding: 80px 0 50px;
+    margin-bottom: 0;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    color: var(--color-white);
+    margin-bottom: 10px;
+}
+
+.page-subtitle {
+    color: var(--color-gold);
+    font-size: 1.1rem;
+}
+
+
+/* ==================== PLAYER CARDS (HOME PAGE) ==================== */
+/* Cards showing top 5 players on the home page */
+.player-card {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.player-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Rank badges — gold, silver, bronze for top 3 */
+.rank-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: white;
+}
+
+.rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); }
+.rank-2 { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); }
+.rank-3 { background: linear-gradient(135deg, #CD7F32, #A0522D); }
+
+/* Player avatar circle */
+.player-avatar {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--color-gold);
+}
+
+.player-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-dark);
+    color: var(--color-gold);
+    font-size: 2.5rem;
+}
+
+.player-name {
+    font-size: 1.15rem;
+    margin-bottom: 5px;
+}
+
+.player-name a {
+    color: var(--color-dark);
+}
+
+.player-name a:hover {
+    color: var(--color-gold);
+}
+
+.player-elo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-gold-dark);
+    margin-bottom: 10px;
+}
+
+/* Win / Loss / Draw stats row */
+.player-stats {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.stat-win { color: var(--color-green); }
+.stat-loss { color: var(--color-red); }
+.stat-draw { color: #777; }
+
+
+/* ==================== MATCH CARDS (HOME PAGE) ==================== */
+/* Compact match cards used on the home page */
+.match-card {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.match-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Status badges — colour-coded by match status */
+.match-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.badge-scheduled { background: #e3f2fd; color: #1565c0; }
+.badge-in_progress { background: #fff3e0; color: #e65100; }
+.badge-completed { background: #e8f5e9; color: #2e7d32; }
+.badge-cancelled { background: #ffebee; color: #c62828; }
+
+/* Player names in match cards */
+.match-players {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.match-player {
+    padding: 8px 0;
+}
+
+.piece-icon {
+    font-size: 1.3rem;
+    margin-right: 8px;
+}
+
+.player-link {
+    font-weight: 600;
+    color: var(--color-dark);
+}
+
+.player-elo-small {
+    font-size: 0.8rem;
+    color: #999;
+    margin-left: 5px;
+}
+
+.match-vs {
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: var(--color-gold);
+    padding: 5px 0;
+}
+
+.match-info {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.match-info div {
+    margin-bottom: 5px;
+}
+
+.match-info i {
+    color: var(--color-gold);
+    margin-right: 8px;
+    width: 16px;
+}
+
+
+/* ==================== MATCH CARDS (FULL — MATCHES PAGE) ==================== */
+/* Larger match cards used on the dedicated matches page */
+.match-card-full {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.match-card-full:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.match-round {
+    font-size: 0.85rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+/* Player layout within match cards */
+.match-players-full {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 0;
+    gap: 15px;
+}
+
+.match-player-side {
+    flex: 1;
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+    background: var(--color-light-bg);
+    transition: all 0.3s ease;
+}
+
+.match-player-side.winner {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border: 2px solid var(--color-green);
+}
+
+.chess-piece {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.chess-piece.white { color: var(--color-gold); }
+.chess-piece.black { color: var(--color-dark); }
+
+.player-name-link {
+    display: block;
+    font-weight: 600;
+    color: var(--color-dark);
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.player-name-link:hover {
+    color: var(--color-gold);
+}
+
+.elo-badge {
+    display: inline-block;
+    background: var(--color-dark);
+    color: var(--color-gold);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.winner-badge {
+    display: block;
+    margin-top: 8px;
+    color: var(--color-green);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.match-vs-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--color-dark);
+    color: var(--color-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.match-details {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.match-detail-item {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.match-detail-item i {
+    color: var(--color-gold);
+    margin-right: 5px;
+}
+
+
+/* ==================== MATCH TABS ==================== */
+/* Tab navigation on the matches page */
+.match-tabs .nav-link {
+    color: var(--color-dark);
+    font-weight: 600;
+    padding: 12px 25px;
+    border-radius: 8px 8px 0 0;
+}
+
+.match-tabs .nav-link.active {
+    background-color: var(--color-dark);
+    color: var(--color-gold);
+    border-color: var(--color-dark);
+}
+
+.result-display {
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 10px;
+    background: var(--color-light-bg);
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+
+/* ==================== ANNOUNCEMENT CARDS ==================== */
+/* News cards displayed on the home page dark section */
+.announcement-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.announcement-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+}
+
+.announcement-date {
+    color: var(--color-gold);
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+}
+
+.announcement-title {
+    color: var(--color-white);
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.announcement-body {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+
+/* ==================== LEADERBOARD TABLE ==================== */
+/* Styled table on the leaderboard page */
+.leaderboard-table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.leaderboard-table thead th {
+    background: var(--color-dark);
+    color: var(--color-gold);
+    border: none;
+    padding: 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.leaderboard-table thead th:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+.leaderboard-table thead th:last-child {
+    border-radius: 0 10px 10px 0;
+}
+
+.leaderboard-row td {
+    padding: 15px;
+    vertical-align: middle;
+    background: var(--color-white);
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.leaderboard-row td:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+.leaderboard-row td:last-child {
+    border-radius: 0 10px 10px 0;
+}
+
+.leaderboard-row:hover td {
+    background: #f8f9fa;
+}
+
+/* Rank medals — gold, silver, bronze */
+.rank-medal {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: white;
+}
+
+.rank-medal.gold { background: linear-gradient(135deg, #FFD700, #FFA500); }
+.rank-medal.silver { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); }
+.rank-medal.bronze { background: linear-gradient(135deg, #CD7F32, #A0522D); }
+
+.rank-number {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #999;
+}
+
+/* Player link in the leaderboard table */
+.player-table-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-dark);
+    font-weight: 600;
+}
+
+.player-table-link:hover {
+    color: var(--color-gold);
+}
+
+.table-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.table-avatar-placeholder {
+    display: inline-flex;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--color-dark);
+    color: var(--color-gold);
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+/* Win percentage bar in the leaderboard */
+.win-pct-bar {
+    position: relative;
+    background: #e9ecef;
+    border-radius: 20px;
+    height: 28px;
+    overflow: hidden;
+    min-width: 100px;
+}
+
+.win-pct-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-green), #20c997);
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.win-pct-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    line-height: 28px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--color-dark);
+    z-index: 1;
+}
+
+
+/* ==================== MEMBER PROFILE PAGE ==================== */
+/* Profile card, stats, chart, and match history */
+.profile-card {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid var(--color-gold);
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-large {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-dark);
+    color: var(--color-gold);
+    font-size: 3.5rem;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+/* Large ELO display on profile */
+.elo-display {
+    background: linear-gradient(135deg, var(--color-dark), var(--color-dark-card));
+    color: var(--color-white);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.elo-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--color-gold);
+    font-family: var(--font-heading);
+}
+
+.elo-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Stats grid — wins, losses, draws boxes */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.stat-box {
+    padding: 15px 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat-wins { background: #e8f5e9; }
+.stat-losses { background: #ffebee; }
+.stat-draws { background: #f5f5f5; }
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stat-wins .stat-value { color: var(--color-green); }
+.stat-losses .stat-value { color: var(--color-red); }
+.stat-draws .stat-value { color: #777; }
+
+.stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #999;
+    letter-spacing: 1px;
+}
+
+/* Chart and history cards */
+.chart-card,
+.history-card {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: var(--color-dark);
+}
+
+.card-title i {
+    color: var(--color-gold);
+    margin-right: 8px;
+}
+
+
+/* ==================== ABOUT PAGE ==================== */
+/* About cards and contact form styling */
+.about-card {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.about-heading {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: var(--color-dark);
+}
+
+.about-heading i {
+    color: var(--color-gold);
+    margin-right: 8px;
+}
+
+.contact-card {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--color-gold);
+    position: sticky;
+    top: 100px;
+}
+
+.contact-details p {
+    margin-bottom: 8px;
+    color: #666;
+}
+
+.contact-details i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+/* ELO tier boxes on the about page */
+.elo-tier {
+    background: var(--color-light-bg);
+    border-radius: 10px;
+    padding: 15px;
+    border-left: 4px solid var(--color-gold);
+}
+
+.elo-tier-range {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-dark);
+}
+
+.elo-tier-label {
+    color: #777;
+    font-size: 0.9rem;
+}
+
+
+/* ==================== FOOTER ==================== */
+/* Site-wide footer at the bottom of every page */
+.site-footer {
+    background: var(--color-dark);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 60px 0 30px;
+}
+
+.site-footer h5 {
+    color: var(--color-white);
+    margin-bottom: 15px;
+}
+
+.footer-icon {
+    color: var(--color-gold);
+    margin-right: 8px;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--color-gold);
+}
+
+.footer-divider {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin: 30px 0 20px;
+}
+
+.site-footer i {
+    margin-right: 8px;
+    color: var(--color-gold);
+}
+
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+/* Adjustments for different screen sizes */
+
+/* Tablets and smaller desktops */
+@media (max-width: 992px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .hero-section {
+        min-height: 500px;
+        padding: 80px 0 60px;
+    }
+
+    .match-players-full {
+        flex-direction: column;
+    }
+
+    .match-vs-circle {
+        margin: 10px auto;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .hero-buttons .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .section-padding {
+        padding: 50px 0;
+    }
+
+    .page-header {
+        padding: 60px 0 30px;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+    }
+}

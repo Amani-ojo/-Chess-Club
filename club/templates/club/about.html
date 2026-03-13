@@ -1,0 +1,194 @@
+{% extends 'club/base.html' %}
+{% load static %}
+
+{% block title %}About — Eschen Chess Club{% endblock %}
+
+{% block content %}
+
+<!-- ==================== PAGE HEADER ==================== -->
+<section class="page-header">
+    <div class="container text-center">
+        <h1 class="page-title"><i class="bi bi-info-circle-fill"></i> About Us</h1>
+        <p class="page-subtitle">Learn more about Eschen Chess Club</p>
+    </div>
+</section>
+<!-- ==================== END PAGE HEADER ==================== -->
+
+
+<!-- ==================== ABOUT CONTENT ==================== -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+
+            <!-- Left column: Club history and mission -->
+            <div class="col-lg-7 mb-4">
+
+                <!-- Club History -->
+                <div class="about-card mb-4">
+                    <h3 class="about-heading">
+                        <i class="bi bi-book"></i> Our History
+                    </h3>
+                    <p>
+                        The Eschen Chess Club was founded by a small group of passionate chess enthusiasts
+                        in the heart of Liechtenstein. What started as casual games in a local cafe has
+                        grown into a vibrant community of players from all skill levels — from curious
+                        beginners learning their first openings to experienced competitors pursuing
+                        master-level ratings.
+                    </p>
+                    <p>
+                        Located in the scenic village of Eschen, our club embodies the spirit of
+                        intellectual competition and camaraderie that makes chess the greatest game
+                        ever invented.
+                    </p>
+                </div>
+
+                <!-- Mission Statement -->
+                <div class="about-card mb-4">
+                    <h3 class="about-heading">
+                        <i class="bi bi-bullseye"></i> Our Mission
+                    </h3>
+                    <p>
+                        To promote the game of chess in Eschen and the wider Liechtenstein community.
+                        We aim to provide a welcoming space where players of every age and ability can
+                        learn, improve, and compete. Through regular club nights, tournaments, and
+                        community events, we strive to make chess accessible and enjoyable for everyone.
+                    </p>
+                </div>
+
+                <!-- Meeting Schedule -->
+                <div class="about-card">
+                    <h3 class="about-heading">
+                        <i class="bi bi-calendar-week"></i> Meeting Schedule
+                    </h3>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th><i class="bi bi-calendar-day"></i> Day</th>
+                                <td>Every Tuesday and Thursday</td>
+                            </tr>
+                            <tr>
+                                <th><i class="bi bi-clock"></i> Time</th>
+                                <td>18:00 — 21:00</td>
+                            </tr>
+                            <tr>
+                                <th><i class="bi bi-geo-alt"></i> Location</th>
+                                <td>Eschen Dorfplatz, 9492 Eschen, Liechtenstein</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        All sessions are open to members and visitors. New players are always welcome!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right column: Contact form -->
+            <div class="col-lg-5">
+                <div class="contact-card">
+                    <h3 class="about-heading">
+                        <i class="bi bi-envelope"></i> Contact Us
+                    </h3>
+                    <p class="text-muted mb-4">
+                        Have a question? Want to join the club? Send us a message and we will
+                        get back to you as soon as possible.
+                    </p>
+
+                    <!-- Contact form -->
+                    <form method="POST" action="{% url 'about' %}">
+                        {% csrf_token %}
+
+                        <!-- Name field -->
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">
+                                <i class="bi bi-person"></i> Your Name
+                            </label>
+                            {{ form.name }}
+                        </div>
+
+                        <!-- Email field -->
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">
+                                <i class="bi bi-envelope"></i> Email Address
+                            </label>
+                            {{ form.email }}
+                        </div>
+
+                        <!-- Message field -->
+                        <div class="mb-3">
+                            <label for="id_message" class="form-label">
+                                <i class="bi bi-chat-dots"></i> Your Message
+                            </label>
+                            {{ form.message }}
+                        </div>
+
+                        <!-- Submit button -->
+                        <button type="submit" class="btn btn-gold w-100">
+                            <i class="bi bi-send"></i> Send Message
+                        </button>
+                    </form>
+
+                    <!-- Contact details -->
+                    <hr class="my-4">
+                    <div class="contact-details">
+                        <p><i class="bi bi-envelope-fill text-warning"></i> club@eschen-chess.li</p>
+                        <p><i class="bi bi-geo-alt-fill text-warning"></i> Eschen Dorfplatz, 9492 Eschen</p>
+                        <p><i class="bi bi-telephone-fill text-warning"></i> +423 123 4567</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<!-- ==================== END ABOUT CONTENT ==================== -->
+
+
+<!-- ==================== ELO EXPLANATION SECTION ==================== -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="about-card text-center">
+                    <h3 class="about-heading">
+                        <i class="bi bi-bar-chart-line"></i> Understanding ELO Ratings
+                    </h3>
+                    <p>
+                        ELO ratings are a numerical system used to measure the relative skill levels
+                        of players in competitive games. Every player starts with a rating of
+                        <strong>1200</strong> and gains or loses points based on match results.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="elo-tier">
+                                <div class="elo-tier-range">1000 — 1200</div>
+                                <div class="elo-tier-label">Beginner</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="elo-tier">
+                                <div class="elo-tier-range">1400 — 1600</div>
+                                <div class="elo-tier-label">Intermediate</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="elo-tier">
+                                <div class="elo-tier-range">1800 — 2000</div>
+                                <div class="elo-tier-label">Advanced</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="elo-tier">
+                                <div class="elo-tier-range">2200+</div>
+                                <div class="elo-tier-label">Master</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ==================== END ELO EXPLANATION ==================== -->
+
+{% endblock %}

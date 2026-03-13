@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Eschen Chess Club{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'club/css/style.css' %}">
+</head>
+<body>
+
+    <!-- ==================== NAVIGATION BAR ==================== -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <!-- Club logo and name -->
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <span class="brand-icon">&#9812;</span>
+                <span class="brand-text">Eschen Chess Club</span>
+            </a>
+
+            <!-- Mobile hamburger button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navigation links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'leaderboard' %}">
+                            <i class="bi bi-trophy"></i> Leaderboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'matches' %}">
+                            <i class="bi bi-calendar-event"></i> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">
+                            <i class="bi bi-info-circle"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- ==================== END NAVIGATION ==================== -->
+
+
+    <!-- ==================== MESSAGES / ALERTS ==================== -->
+    {% if messages %}
+    <div class="container mt-5 pt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <!-- ==================== END MESSAGES ==================== -->
+
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main>
+        {% block content %}
+        <!-- Page content goes here -->
+        {% endblock %}
+    </main>
+    <!-- ==================== END MAIN CONTENT ==================== -->
+
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row">
+                <!-- Column 1: Club info -->
+                <div class="col-md-4 mb-4">
+                    <h5><span class="footer-icon">&#9812;</span> Eschen Chess Club</h5>
+                    <p class="text-muted">
+                        Eschen Dorfplatz, Liechtenstein - 9492<br>
+                        Bringing chess players together since the community was founded.
+                    </p>
+                </div>
+
+                <!-- Column 2: Quick links -->
+                <div class="col-md-4 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{% url 'home' %}">Home</a></li>
+                        <li><a href="{% url 'leaderboard' %}">Leaderboard</a></li>
+                        <li><a href="{% url 'matches' %}">Matches</a></li>
+                        <li><a href="{% url 'about' %}">About</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Contact info -->
+                <div class="col-md-4 mb-4">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="bi bi-envelope"></i> club@eschen-chess.li</li>
+                        <li><i class="bi bi-geo-alt"></i> Eschen Dorfplatz, 9492</li>
+                        <li><i class="bi bi-clock"></i> Tuesdays & Thursdays, 18:00 - 21:00</li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="footer-divider">
+
+            <div class="text-center text-muted">
+                <p>&copy; 2026 Eschen Chess Club. All rights reserved. &#9812; &#9813; &#9814; &#9815; &#9816; &#9817;</p>
+            </div>
+        </div>
+    </footer>
+    <!-- ==================== END FOOTER ==================== -->
+
+
+    <!-- Bootstrap 5 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js (for ELO history charts) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="{% static 'club/js/app.js' %}"></script>
+
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>
