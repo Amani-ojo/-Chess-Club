@@ -1,6 +1,2 @@
 Django>=5.0
 Pillow
-whitenoise
-django-crispy-forms
-crispy-bootstrap5
-python-decouple
