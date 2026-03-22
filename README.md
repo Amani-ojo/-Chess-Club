@@ -2,7 +2,7 @@
 
 A web application for the Eschen Chess Club (Liechtenstein) built with Django. The system manages club members, tracks matches, calculates ELO ratings, and publishes announcements.
 
-## Tech Stack
+## Tech Stack 
 
 | Layer        | Technology                             |
 |--------------|----------------------------------------|
