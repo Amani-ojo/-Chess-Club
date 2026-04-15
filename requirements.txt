@@ -1,2 +1,9 @@
 Django>=5.0
 Pillow
+
+# AI Pipeline dependencies
+celery>=5.3
+redis>=5.0
+requests>=2.31
+python-chess>=1.999
+stockfish>=3.28
