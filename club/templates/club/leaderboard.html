@@ -1,0 +1,86 @@
+{% extends 'club/base.html' %}
+
+{% block title %}Leaderboard — Eschen Chess Club{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-trophy"></i> Leaderboard</h1>
+        <p class="text-muted">Club members ranked by performance</p>
+    </div>
+</section>
+
+<section class="section-block">
+    <div class="container">
+
+        <!-- Sort toggles -->
+        <div class="mb-4 text-end">
+            <span class="me-2 text-muted">Sort by:</span>
+            <a href="?sort=elo"
+               class="btn btn-sm {% if sort_by == 'elo' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                ELO Rating
+            </a>
+            <a href="?sort=wins"
+               class="btn btn-sm {% if sort_by == 'wins' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                Win %
+            </a>
+        </div>
+
+        {% if members %}
+        <div class="table-responsive">
+            <table class="table table-hover leaderboard-table align-middle">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 60px;">Rank</th>
+                        <th>Player</th>
+                        <th class="text-center">ELO</th>
+                        <th class="text-center">W</th>
+                        <th class="text-center">L</th>
+                        <th class="text-center">D</th>
+                        <th class="text-center">Games</th>
+                        <th class="text-center">Win %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td class="text-center fw-bold">
+                            {% if forloop.counter == 1 %}
+                                <span class="rank-medal gold">&#9813;</span>
+                            {% elif forloop.counter == 2 %}
+                                <span class="rank-medal silver">&#9813;</span>
+                            {% elif forloop.counter == 3 %}
+                                <span class="rank-medal bronze">&#9813;</span>
+                            {% else %}
+                                {{ forloop.counter }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'member_profile' member.pk %}" class="player-link">
+                                {% if member.avatar %}
+                                <img src="{{ member.avatar.url }}" alt="" class="leaderboard-avatar">
+                                {% else %}
+                                <span class="leaderboard-avatar-placeholder">
+                                    <i class="bi bi-person-fill"></i>
+                                </span>
+                                {% endif %}
+                                {{ member.display_name }}
+                            </a>
+                        </td>
+                        <td class="text-center fw-bold">{{ member.elo_rating }}</td>
+                        <td class="text-center text-success">{{ member.wins }}</td>
+                        <td class="text-center text-danger">{{ member.losses }}</td>
+                        <td class="text-center text-warning">{{ member.draws }}</td>
+                        <td class="text-center">{{ member.total_games }}</td>
+                        <td class="text-center">{{ member.win_percentage }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center">No members registered yet.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
