@@ -1,0 +1,476 @@
+/* ============================================================
+   Eschen Chess Club — Custom Styles
+   ============================================================ */
+
+/* ---------- CSS Variables ---------- */
+:root {
+    --color-dark: #1a1a2e;
+    --color-darker: #16213e;
+    --color-accent: #b58863;
+    --color-accent-light: #f0d9b5;
+    --color-light-square: #f0d9b5;
+    --color-dark-square: #b58863;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+
+/* ---------- Global ---------- */
+body {
+    font-family: var(--font-body);
+    background-color: #f8f9fa;
+    color: #333;
+    padding-top: 70px;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: var(--font-heading);
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #8b6639;
+}
+
+
+/* ---------- Navbar ---------- */
+.navbar {
+    background-color: var(--color-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    padding: 0.8rem 0;
+}
+
+.brand-icon {
+    font-size: 1.8rem;
+    margin-right: 8px;
+    color: var(--color-accent);
+}
+
+.brand-text {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+.navbar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.2s;
+}
+
+.navbar .nav-link:hover {
+    color: var(--color-accent);
+}
+
+.navbar .nav-link i {
+    margin-right: 4px;
+}
+
+
+/* ---------- Hero Section ---------- */
+.hero-section {
+    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-darker) 100%);
+    color: white;
+    padding: 100px 0 80px;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.hero-buttons .btn-primary {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.hero-buttons .btn-primary:hover {
+    background-color: #8b6639;
+    border-color: #8b6639;
+}
+
+
+/* ---------- Page Headers ---------- */
+.page-header {
+    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-darker) 100%);
+    color: white;
+    padding: 60px 0 40px;
+}
+
+.page-header h1 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-header .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+
+/* ---------- Sections ---------- */
+.section-block {
+    padding: 60px 0;
+}
+
+.section-alt {
+    background-color: #f0f0f0;
+}
+
+.section-title {
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--color-dark);
+}
+
+.section-title i {
+    color: var(--color-accent);
+    margin-right: 8px;
+}
+
+
+/* ---------- Cards ---------- */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ---------- Player Cards ---------- */
+.player-card .card-title a {
+    color: var(--color-dark);
+    font-weight: 600;
+}
+
+.player-card .card-title a:hover {
+    color: var(--color-accent);
+}
+
+.rank-badge {
+    display: inline-block;
+    background: var(--color-accent);
+    color: white;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.player-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-accent-light);
+}
+
+.player-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--color-accent-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--color-accent);
+}
+
+.elo-rating {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    margin-bottom: 0.25rem;
+}
+
+
+/* ---------- Match Cards ---------- */
+.match-card .match-players {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.vs-badge {
+    display: inline-block;
+    background: var(--color-dark);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+
+/* ---------- Match Detail ---------- */
+.match-detail-card {
+    border-radius: 16px;
+}
+
+.match-detail-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-accent-light);
+}
+
+.match-detail-avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--color-accent-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--color-accent);
+    margin: 0 auto;
+}
+
+.vs-badge-lg {
+    display: inline-block;
+    background: var(--color-dark);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+
+/* ---------- Leaderboard ---------- */
+.leaderboard-table thead {
+    background-color: var(--color-dark);
+    color: white;
+}
+
+.leaderboard-table thead th {
+    font-weight: 600;
+    padding: 12px;
+    border: none;
+}
+
+.leaderboard-table tbody tr {
+    transition: background-color 0.15s;
+}
+
+.leaderboard-table tbody tr:hover {
+    background-color: var(--color-accent-light);
+}
+
+.leaderboard-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.leaderboard-avatar-placeholder {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-accent-light);
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    vertical-align: middle;
+    font-size: 0.9rem;
+    color: var(--color-accent);
+}
+
+.player-link {
+    color: var(--color-dark);
+    font-weight: 500;
+}
+
+.player-link:hover {
+    color: var(--color-accent);
+}
+
+.rank-medal {
+    font-size: 1.5rem;
+}
+
+.rank-medal.gold {
+    color: #ffd700;
+}
+
+.rank-medal.silver {
+    color: #c0c0c0;
+}
+
+.rank-medal.bronze {
+    color: #cd7f32;
+}
+
+
+/* ---------- Profile ---------- */
+.profile-card {
+    border-radius: 16px;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--color-accent-light);
+}
+
+.profile-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--color-accent-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--color-accent);
+}
+
+.elo-rating-lg {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+
+/* ---------- Announcement Cards ---------- */
+.announcement-card .card-title {
+    font-family: var(--font-heading);
+    color: var(--color-dark);
+}
+
+
+/* ---------- Nav Pills ---------- */
+.nav-pills .nav-link.active {
+    background-color: var(--color-accent);
+    color: white;
+}
+
+.nav-pills .nav-link {
+    color: var(--color-dark);
+    font-weight: 500;
+}
+
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.btn-primary:hover {
+    background-color: #8b6639;
+    border-color: #8b6639;
+}
+
+.btn-outline-primary {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
+}
+
+
+/* ---------- Footer ---------- */
+.site-footer {
+    background-color: var(--color-dark);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 50px 0 20px;
+    margin-top: 60px;
+}
+
+.site-footer h5 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.footer-icon {
+    color: var(--color-accent);
+    margin-right: 6px;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: var(--color-accent);
+}
+
+.footer-divider {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-buttons .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .match-detail-avatar,
+    .match-detail-avatar-placeholder {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+    }
+
+    .vs-badge-lg {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+}
