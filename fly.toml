@@ -1,0 +1,37 @@
+# fly.toml — ChessMate
+#
+# Run `fly launch --no-deploy --copy-config` on first setup to register the app
+# name (Fly needs one that is globally unique). Then `fly deploy`.
+
+app = "chessmate-eschen"
+primary_region = "fra"
+
+[build]
+
+[env]
+  DJANGO_DEBUG = "False"
+  DJANGO_ALLOWED_HOSTS = "chessmate-eschen.fly.dev"
+  DJANGO_CSRF_TRUSTED_ORIGINS = "https://chessmate-eschen.fly.dev"
+  DJANGO_DATABASE_PATH = "/data/db.sqlite3"
+  DJANGO_MEDIA_ROOT = "/data/media"
+  PORT = "8000"
+
+[deploy]
+  release_command = "python manage.py migrate --noinput"
+
+[[mounts]]
+  source = "chessmate_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
