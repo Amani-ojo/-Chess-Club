@@ -3,15 +3,15 @@
 # Run `fly launch --no-deploy --copy-config` on first setup to register the app
 # name (Fly needs one that is globally unique). Then `fly deploy`.
 
-app = "chessmate-eschen"
+app = "isd-course"
 primary_region = "fra"
 
 [build]
 
 [env]
   DJANGO_DEBUG = "False"
-  DJANGO_ALLOWED_HOSTS = "chessmate-eschen.fly.dev"
-  DJANGO_CSRF_TRUSTED_ORIGINS = "https://chessmate-eschen.fly.dev"
+  DJANGO_ALLOWED_HOSTS = "isd-course.fly.dev"
+  DJANGO_CSRF_TRUSTED_ORIGINS = "https://isd-course.fly.dev"
   DJANGO_DATABASE_PATH = "/data/db.sqlite3"
   DJANGO_MEDIA_ROOT = "/data/media"
   PORT = "8000"
