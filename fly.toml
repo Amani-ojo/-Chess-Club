@@ -16,9 +16,6 @@ primary_region = "fra"
   DJANGO_MEDIA_ROOT = "/data/media"
   PORT = "8000"
 
-[deploy]
-  release_command = "python manage.py migrate --noinput"
-
 [[mounts]]
   source = "chessmate_data"
   destination = "/data"

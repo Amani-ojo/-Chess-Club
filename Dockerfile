@@ -24,17 +24,18 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libjpeg62-turbo \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd --system app && useradd --system --gid app --home /app app
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local
-COPY --chown=app:app . .
+COPY . .
 
-RUN python manage.py collectstatic --noinput
-
-USER app
+RUN sed -i 's/\r$//' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh \
+    && python manage.py collectstatic --noinput
 
 EXPOSE 8000
+
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 CMD ["gunicorn", "chess_club.wsgi:application", \
      "--bind", "0.0.0.0:8000", \
