@@ -2,3 +2,5 @@ Django>=5.0
 Pillow
 django-crispy-forms
 crispy-bootstrap5
+gunicorn
+whitenoise
