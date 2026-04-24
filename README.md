@@ -154,6 +154,34 @@ Each feature branch is created from `develop`, worked on, and merged back into `
 
 6. Open your browser and visit `http://127.0.0.1:8000/`
 
+## AI Pipeline Integration
+
+The project now includes a full AI analysis pipeline integrated into the same Django app:
+
+- Lichess import tasks
+- Stockfish game analysis
+- Move-by-move evaluations
+- Player insight generation
+
+### Environment Variables (optional but recommended)
+
+Set these before running:
+
+- `LICHESS_API_TOKEN` for authenticated Lichess API usage
+- `STOCKFISH_PATH` to your local Stockfish executable (defaults to the bundled binary path)
+- `CELERY_BROKER_URL` (default `redis://localhost:6379/0`)
+
+### Running Locally with Pipeline
+
+1. Start Redis.
+2. Run Django:
+   - `python manage.py migrate`
+   - `python manage.py runserver`
+3. In another terminal, run Celery worker:
+   - `celery -A chess_club worker -l info`
+
+Use `/admin/` to add members and games, then trigger task functions from the shell or admin workflows.
+
 ## Contributors
 
 - Amani Ojo
