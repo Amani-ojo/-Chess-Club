@@ -73,6 +73,11 @@ def analyse_game_task(self, game_id):
         analysis.status = 'completed'
         analysis.analysed_at = django_tz.now()
         analysis.save()
+
+        # Keep user insights current automatically after each completed analysis.
+        generate_insights_task.delay(game.player_white_id)
+        if game.player_black_id != game.player_white_id:
+            generate_insights_task.delay(game.player_black_id)
     except Exception as exc:
         logger.exception('analyse_game_task failed for game %s', game_id)
         analysis.status = 'failed'
