@@ -6,6 +6,12 @@
 <div class="container my-4">
     <h2 class="mb-1">{{ game.player_white }} vs {{ game.player_black }}</h2>
     <p class="text-muted mb-4">{{ game.played_at|date:"F j, Y H:i" }} · {{ game.time_control }} · Result: <strong>{{ game.result }}</strong></p>
+    {% if analysis and analysis.status == 'completed' %}
+    <div class="mb-3 d-flex gap-2">
+        <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'json' %}" class="btn btn-sm btn-outline-dark">Download JSON</a>
+        <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'csv' %}" class="btn btn-sm btn-outline-dark">Download CSV</a>
+    </div>
+    {% endif %}
 
     {% if not analysis %}
         <div class="alert alert-warning">No analysis found for this game.</div>

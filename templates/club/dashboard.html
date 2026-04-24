@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">My Dashboard</h1>
+        <a href="{% url 'api-docs' %}" class="btn btn-outline-dark btn-sm">Open API Test Console</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">Profile, API, and Theme</div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" name="action" value="save_profile" class="btn btn-primary">Save Settings</button>
+                        <button type="submit" name="action" value="import_games" class="btn btn-outline-success">Import Recent Games</button>
+                    </form>
+                    <p class="small text-muted mt-3 mb-0">API token is stored in your Django profile and used by backend jobs to call Lichess.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">My Imported Games</div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Game</th>
+                                <th>Result</th>
+                                <th>Played</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for game in games %}
+                            <tr>
+                                <td>{{ game.player_white }} vs {{ game.player_black }}</td>
+                                <td>{{ game.result }}</td>
+                                <td>{{ game.played_at|date:"Y-m-d H:i" }}</td>
+                                <td class="d-flex gap-2">
+                                    <a href="{% url 'ai_pipeline:game_analysis' game.pk %}" class="btn btn-sm btn-outline-primary">Analysis</a>
+                                    <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'json' %}" class="btn btn-sm btn-outline-secondary">JSON</a>
+                                    <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'csv' %}" class="btn btn-sm btn-outline-secondary">CSV</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-muted">No games imported yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

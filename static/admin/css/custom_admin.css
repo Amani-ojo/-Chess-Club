@@ -1,0 +1,54 @@
+:root {
+    --brand-primary: #113d6b;
+    --brand-accent: #4da3ff;
+    --brand-bg: #0f2238;
+}
+
+#header {
+    background: linear-gradient(90deg, var(--brand-bg), var(--brand-primary));
+    color: #fff;
+}
+
+#branding h1,
+#branding h1 a:link,
+#branding h1 a:visited {
+    color: #fff;
+    font-weight: 700;
+}
+
+.brand-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brand-subtitle {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #a8d3ff;
+}
+
+div.breadcrumbs {
+    background: #173a5f;
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: #1f4e7f;
+}
+
+a:link,
+a:visited {
+    color: #1f5f99;
+}
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    background: #1f5f99;
+    border-radius: 6px;
+}

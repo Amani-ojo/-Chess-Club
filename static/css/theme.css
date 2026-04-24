@@ -1,0 +1,43 @@
+body.theme-classic {
+    background: #f8f9fa;
+    color: #1d2430;
+}
+
+body.theme-classic .card {
+    background: #fff;
+}
+
+body.theme-midnight {
+    background: #0f1220;
+    color: #dbe5ff;
+}
+
+body.theme-midnight .card,
+body.theme-midnight .card-header {
+    background: #1a2033 !important;
+    color: #dbe5ff;
+}
+
+body.theme-midnight .table {
+    color: #dbe5ff;
+}
+
+body.theme-forest {
+    background: #edf6ef;
+    color: #1f3b2b;
+}
+
+body.theme-forest .card,
+body.theme-forest .card-header {
+    background: #f8fffa !important;
+}
+
+body.theme-royal {
+    background: #eef3ff;
+    color: #1d2f57;
+}
+
+body.theme-royal .card,
+body.theme-royal .card-header {
+    background: #f9fbff !important;
+}

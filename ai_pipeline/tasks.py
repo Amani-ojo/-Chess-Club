@@ -66,14 +66,14 @@ def analyse_game_task(self, game_id):
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=120)
-def fetch_lichess_games_task(self, lichess_username, member_id):
+def fetch_lichess_games_task(self, lichess_username, member_id, api_token=''):
     try:
         member = Member.objects.get(pk=member_id)
     except Member.DoesNotExist:
         logger.error('fetch_lichess_games_task: Member %s not found.', member_id)
         return
 
-    client = LichessClient()
+    client = LichessClient(api_token=api_token)
     try:
         raw_games = client.fetch_recent_games(lichess_username)
     except LichessAPIError as exc:

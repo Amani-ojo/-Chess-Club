@@ -5,3 +5,5 @@ redis
 requests
 python-chess
 stockfish
+djangorestframework
+drf-spectacular

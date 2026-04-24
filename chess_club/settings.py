@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'drf_spectacular',
     'club',
     'ai_pipeline',
 ]
@@ -50,6 +52,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'club.context_processors.user_theme',
             ],
         },
     },
@@ -81,7 +84,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATICFILES_DIRS = []
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (user uploads like avatars)
@@ -109,3 +112,24 @@ CELERY_TIMEZONE = TIME_ZONE
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'club:login'
+LOGIN_REDIRECT_URL = 'club:dashboard'
+LOGOUT_REDIRECT_URL = 'club:home'
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Eschen Chess Club API',
+    'DESCRIPTION': 'Interactive API surface for pipeline functions and diagnostics.',
+    'VERSION': '1.0.0',
+}

@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div class="brand-wrap">
+    <h1 id="site-name"><a href="{% url 'admin:index' %}">Eschen Chess Club Control Center</a></h1>
+    <span class="brand-subtitle">AI Pipeline • Membership • Analytics</span>
+</div>
+{% endblock %}
