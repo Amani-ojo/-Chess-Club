@@ -10,7 +10,7 @@ from .tasks import analyse_game_task, fetch_lichess_games_task, generate_insight
 
 
 class GameActionSerializer(serializers.Serializer):
-    game_id = serializers.IntegerField()
+    game_id = serializers.CharField()
 
 
 class MemberActionSerializer(serializers.Serializer):
@@ -50,9 +50,15 @@ class AnalyseGameAPIView(APIView):
     def post(self, request):
         serializer = GameActionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        game_id = serializer.validated_data['game_id']
-        analyse_game_task.delay(game_id)
-        return Response({'status': 'queued', 'task': 'analyse_game', 'game_id': game_id})
+        game_ref = serializer.validated_data['game_id'].strip()
+        game = Game.objects.filter(lichess_game_id=game_ref).first()
+        if not game and game_ref.isdigit():
+            game = Game.objects.filter(pk=int(game_ref)).first()
+        if not game:
+            return Response({'detail': 'Game not found for provided game_id.'}, status=status.HTTP_404_NOT_FOUND)
+
+        analyse_game_task.delay(game.id)
+        return Response({'status': 'queued', 'task': 'analyse_game', 'game_id': game.id, 'lichess_game_id': game.lichess_game_id})
 
 
 class GenerateInsightsAPIView(APIView):
@@ -78,7 +84,10 @@ class GameAnalysisAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, game_id):
-        game = Game.objects.filter(pk=game_id).select_related('analysis').first()
+        game_ref = game_id.strip()
+        game = Game.objects.filter(lichess_game_id=game_ref).select_related('analysis').first()
+        if not game and game_ref.isdigit():
+            game = Game.objects.filter(pk=int(game_ref)).select_related('analysis').first()
         if not game:
             return Response({'detail': 'Game not found.'}, status=status.HTTP_404_NOT_FOUND)
         analysis = getattr(game, 'analysis', None)
@@ -96,7 +105,12 @@ class GameAnalysisAPIView(APIView):
             )
         return Response(
             {
-                'game': {'id': game.id, 'result': game.result, 'time_control': game.time_control},
+                'game': {
+                    'id': game.id,
+                    'lichess_game_id': game.lichess_game_id,
+                    'result': game.result,
+                    'time_control': game.time_control,
+                },
                 'analysis': {
                     'status': analysis.status,
                     'white_avg_centipawn_loss': analysis.white_avg_centipawn_loss,

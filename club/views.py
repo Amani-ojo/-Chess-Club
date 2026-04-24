@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from ai_pipeline.models import Game
 from ai_pipeline.tasks import fetch_lichess_games_task
@@ -56,6 +59,8 @@ def register_view(request):
 def dashboard_view(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     form = UserProfileForm(request.POST or None, instance=profile)
+    auto_sync_queued = False
+    member = None
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -85,9 +90,33 @@ def dashboard_view(request):
 
     games = []
     if profile.lichess_username:
-        member = Member.objects.filter(lichess_username=profile.lichess_username).first()
+        member, _ = Member.objects.get_or_create(
+            display_name=request.user.username,
+            defaults={'lichess_username': profile.lichess_username},
+        )
+        if member.lichess_username != profile.lichess_username:
+            member.lichess_username = profile.lichess_username
+            member.save(update_fields=['lichess_username'])
+
+        # Auto-sync dashboard games with a short cooldown to prevent task spam.
+        if profile.lichess_api_key:
+            now = timezone.now()
+            cooldown = timedelta(minutes=5)
+            if (
+                profile.last_lichess_sync_requested_at is None
+                or now - profile.last_lichess_sync_requested_at >= cooldown
+            ):
+                fetch_lichess_games_task.delay(profile.lichess_username, member.id, profile.lichess_api_key)
+                profile.last_lichess_sync_requested_at = now
+                profile.save(update_fields=['last_lichess_sync_requested_at'])
+                auto_sync_queued = True
+
         if member:
             games = (
                 Game.objects.filter(player_white=member) | Game.objects.filter(player_black=member)
             ).select_related('player_white', 'player_black').distinct()[:20]
-    return render(request, 'club/dashboard.html', {'form': form, 'profile': profile, 'games': games})
+    return render(
+        request,
+        'club/dashboard.html',
+        {'form': form, 'profile': profile, 'games': games, 'auto_sync_queued': auto_sync_queued},
+    )

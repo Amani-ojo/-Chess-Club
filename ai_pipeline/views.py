@@ -3,6 +3,7 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 
 from club.models import Member
@@ -10,13 +11,21 @@ from club.models import Member
 from .models import Game
 
 
+def _resolve_game(game_id):
+    game_id = str(game_id).strip()
+    query = Q(lichess_game_id=game_id)
+    if game_id.isdigit():
+        query = query | Q(pk=int(game_id))
+    return get_object_or_404(Game, query)
+
+
 def game_embed(request, game_id):
-    game = get_object_or_404(Game, pk=game_id)
+    game = _resolve_game(game_id)
     return render(request, 'ai_pipeline/game_embed.html', {'game': game})
 
 
 def game_analysis_view(request, game_id):
-    game = get_object_or_404(Game, pk=game_id)
+    game = _resolve_game(game_id)
     analysis = getattr(game, 'analysis', None)
     moves = analysis.move_evaluations.all() if analysis else []
     return render(
@@ -38,7 +47,7 @@ def player_insights_view(request, member_id):
 
 @login_required
 def export_game_analysis(request, game_id, fmt='json'):
-    game = get_object_or_404(Game, pk=game_id)
+    game = _resolve_game(game_id)
     profile = getattr(request.user, 'profile', None)
     if not profile or not profile.lichess_username:
         return HttpResponse('No linked member profile found.', status=403)

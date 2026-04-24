@@ -8,6 +8,11 @@
         <h1 class="h3 mb-0">My Dashboard</h1>
         <a href="{% url 'api-docs' %}" class="btn btn-outline-dark btn-sm">Open API Test Console</a>
     </div>
+    {% if auto_sync_queued %}
+    <div class="alert alert-info">
+        Your dashboard auto-started a background sync from Lichess. Refresh in a few seconds to see latest games.
+    </div>
+    {% endif %}
 
     <div class="row g-4">
         <div class="col-lg-5">
