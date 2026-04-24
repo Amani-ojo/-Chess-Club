@@ -191,6 +191,15 @@ chmod +x bootstrap_codespace.sh
 ./bootstrap_codespace.sh
 ```
 
+After bootstrap, you can start all required services with one command:
+
+```bash
+chmod +x start_all_services.sh
+./start_all_services.sh
+```
+
+This starts Redis, launches Celery in the background (logs in `.logs/celery.log`), and runs Django in the foreground.
+
 Then start services in separate terminals:
 
 ```bash
