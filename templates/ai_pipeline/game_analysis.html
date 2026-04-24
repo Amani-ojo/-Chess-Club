@@ -25,9 +25,12 @@
             <div class="card-body">
                 <p class="mb-2">{{ report.summary }}</p>
                 <div class="row g-3">
-                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Performance Edge</div><div class="fw-semibold">{{ report.stronger_side }}</div></div></div>
-                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">White Error Events</div><div class="fw-semibold">{{ report.white_total_errors }}</div></div></div>
-                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Black Error Events</div><div class="fw-semibold">{{ report.black_total_errors }}</div></div></div>
+                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Your Side</div><div class="fw-semibold">{{ report.user_side }}</div></div></div>
+                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Your Avg CPL</div><div class="fw-semibold">{{ report.user_avg_cpl }}</div></div></div>
+                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Opponent Avg CPL</div><div class="fw-semibold">{{ report.opponent_avg_cpl }}</div></div></div>
+                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Your Error Events</div><div class="fw-semibold">{{ report.user_total_errors }}</div></div></div>
+                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Opponent Error Events</div><div class="fw-semibold">{{ report.opponent_total_errors }}</div></div></div>
+                    <div class="col-md-4"><div class="p-3 rounded border h-100"><div class="small text-muted">Result vs Opponent</div><div class="fw-semibold">{% if report.user_outperformed %}You outperformed{% else %}Needs improvement{% endif %}</div></div></div>
                 </div>
                 <div class="mt-3">
                     <div class="fw-semibold mb-2">Priority Areas for Improvement</div>
