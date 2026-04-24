@@ -182,6 +182,33 @@ Set these before running:
 
 Use `/admin/` to add members and games, then trigger task functions from the shell or admin workflows.
 
+### Codespaces Bootstrap (One Command)
+
+For GitHub Codespaces, you can bootstrap all dependencies with:
+
+```bash
+chmod +x bootstrap_codespace.sh
+./bootstrap_codespace.sh
+```
+
+Then start services in separate terminals:
+
+```bash
+source .venv/bin/activate
+export STOCKFISH_PATH=/usr/games/stockfish
+export CELERY_BROKER_URL=redis://localhost:6379/0
+export CELERY_RESULT_BACKEND=redis://localhost:6379/0
+python manage.py runserver 0.0.0.0:8000
+```
+
+```bash
+source .venv/bin/activate
+export STOCKFISH_PATH=/usr/games/stockfish
+export CELERY_BROKER_URL=redis://localhost:6379/0
+export CELERY_RESULT_BACKEND=redis://localhost:6379/0
+celery -A chess_club worker -l info
+```
+
 ## Contributors
 
 - Amani Ojo
