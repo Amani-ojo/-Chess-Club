@@ -19,11 +19,13 @@ def _resolve_game(game_id):
     return get_object_or_404(Game, query)
 
 
+@login_required
 def game_embed(request, game_id):
     game = _resolve_game(game_id)
     return render(request, 'ai_pipeline/game_embed.html', {'game': game})
 
 
+@login_required
 def game_analysis_view(request, game_id):
     game = _resolve_game(game_id)
     analysis = getattr(game, 'analysis', None)
@@ -104,6 +106,7 @@ def game_analysis_view(request, game_id):
     )
 
 
+@login_required
 def player_insights_view(request, member_id):
     member = get_object_or_404(Member, pk=member_id)
     insights = member.insights.all()
