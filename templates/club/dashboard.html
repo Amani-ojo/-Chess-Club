@@ -64,5 +64,171 @@
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">Elo Progress</div>
+                <div class="card-body">
+                    <canvas id="eloProgressChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">Skill Radar</div>
+                <div class="card-body">
+                    <canvas id="skillRadarChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                    <span>Tournament Standings</span>
+                    <small class="text-muted">Auto-refreshes every 30s</small>
+                </div>
+                <div class="table-responsive">
+                    <table class="table mb-0" id="standingsTable">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Player</th>
+                            <th>Points</th>
+                            <th>W</th>
+                            <th>D</th>
+                            <th>L</th>
+                            <th>Played</th>
+                            <th>Buchholz</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in metrics.standings %}
+                            <tr>
+                                <td>{{ row.rank }}</td>
+                                <td>{{ row.name }}</td>
+                                <td>{{ row.points }}</td>
+                                <td>{{ row.wins }}</td>
+                                <td>{{ row.draws }}</td>
+                                <td>{{ row.losses }}</td>
+                                <td>{{ row.played }}</td>
+                                <td>{{ row.buchholz }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="8" class="text-muted">No standings data yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+{{ metrics|json_script:"dashboard-metrics-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const initialMetrics = JSON.parse(document.getElementById('dashboard-metrics-data').textContent);
+    let eloChart;
+    let radarChart;
+
+    function renderElo(data) {
+        const labels = (data || []).map(p => p.x);
+        const values = (data || []).map(p => p.y);
+        const ctx = document.getElementById('eloProgressChart').getContext('2d');
+        if (eloChart) {
+            eloChart.data.labels = labels;
+            eloChart.data.datasets[0].data = values;
+            eloChart.update();
+            return;
+        }
+        eloChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Elo',
+                    data: values,
+                    borderColor: '#1f5f99',
+                    backgroundColor: 'rgba(31,95,153,0.15)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function renderRadar(radarData) {
+        const ctx = document.getElementById('skillRadarChart').getContext('2d');
+        if (radarChart) {
+            radarChart.data.labels = radarData.labels;
+            radarChart.data.datasets[0].data = radarData.values;
+            radarChart.update();
+            return;
+        }
+        radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: radarData.labels,
+                datasets: [{
+                    label: 'Skill Profile',
+                    data: radarData.values,
+                    borderColor: '#2b9348',
+                    backgroundColor: 'rgba(43,147,72,0.2)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { r: { suggestedMin: 0, suggestedMax: 100 } }
+            }
+        });
+    }
+
+    function renderStandings(rows) {
+        const tbody = document.querySelector('#standingsTable tbody');
+        tbody.innerHTML = '';
+        if (!rows || !rows.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-muted">No standings data yet.</td></tr>';
+            return;
+        }
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.rank}</td>
+                <td>${row.name}</td>
+                <td>${row.points}</td>
+                <td>${row.wins}</td>
+                <td>${row.draws}</td>
+                <td>${row.losses}</td>
+                <td>${row.played}</td>
+                <td>${row.buchholz}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderAll(metrics) {
+        renderElo(metrics.elo_progress || []);
+        renderRadar(metrics.skill_radar || {labels: [], values: []});
+        renderStandings(metrics.standings || []);
+    }
+
+    async function refreshMetrics() {
+        try {
+            const response = await fetch('{% url "club:dashboard_metrics" %}', {headers: {'X-Requested-With': 'XMLHttpRequest'}});
+            if (!response.ok) return;
+            const data = await response.json();
+            renderAll(data);
+        } catch (e) {
+            console.debug('Dashboard refresh skipped:', e);
+        }
+    }
+
+    renderAll(initialMetrics);
+    setInterval(refreshMetrics, 30000);
+</script>
 {% endblock %}
