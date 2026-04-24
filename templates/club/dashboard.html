@@ -50,7 +50,7 @@
                                 <td>{{ game.result }}</td>
                                 <td>{{ game.played_at|date:"Y-m-d H:i" }}</td>
                                 <td class="d-flex gap-2">
-                                    <a href="{% url 'ai_pipeline:game_analysis' game.pk %}" class="btn btn-sm btn-outline-primary">Analysis</a>
+                                    <a href="{% url 'ai_pipeline:game_analysis' game.lichess_game_id|default:game.pk %}" class="btn btn-sm btn-primary">Stockfish</a>
                                     <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'json' %}" class="btn btn-sm btn-outline-secondary">JSON</a>
                                     <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'csv' %}" class="btn btn-sm btn-outline-secondary">CSV</a>
                                 </td>
@@ -90,6 +90,9 @@
                 <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
                     <span>Tournament Standings</span>
                     <small class="text-muted">Auto-refreshes every 30s</small>
+                </div>
+                <div class="px-3 pt-2 small text-muted">
+                    W = Wins, D = Draws, L = Losses.
                 </div>
                 <div class="table-responsive">
                     <table class="table mb-0" id="standingsTable">

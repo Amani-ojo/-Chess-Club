@@ -45,7 +45,10 @@
                                 <td>{{ game.player_white }} vs {{ game.player_black }}</td>
                                 <td>{{ game.result }}</td>
                                 <td>{{ game.played_at|date:"Y-m-d H:i" }}</td>
-                                <td><a href="{% url 'ai_pipeline:game_embed' game.pk %}" class="btn btn-sm btn-primary">Open</a></td>
+                                <td class="d-flex gap-2">
+                                    <a href="{% url 'ai_pipeline:game_embed' game.lichess_game_id|default:game.pk %}" class="btn btn-sm btn-outline-dark">View</a>
+                                    <a href="{% url 'ai_pipeline:game_analysis' game.lichess_game_id|default:game.pk %}" class="btn btn-sm btn-primary">Stockfish</a>
+                                </td>
                             </tr>
                         {% empty %}
                             <tr><td colspan="4" class="text-muted">No games imported yet.</td></tr>

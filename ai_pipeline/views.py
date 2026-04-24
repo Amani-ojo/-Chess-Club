@@ -28,10 +28,40 @@ def game_analysis_view(request, game_id):
     game = _resolve_game(game_id)
     analysis = getattr(game, 'analysis', None)
     moves = analysis.move_evaluations.all() if analysis else []
+    report = None
+    if analysis and analysis.status == 'completed':
+        white_total = analysis.white_blunders + analysis.white_mistakes + analysis.white_inaccuracies
+        black_total = analysis.black_blunders + analysis.black_mistakes + analysis.black_inaccuracies
+
+        if (analysis.white_avg_centipawn_loss or 0) <= (analysis.black_avg_centipawn_loss or 0):
+            stronger_side = 'White'
+        else:
+            stronger_side = 'Black'
+
+        focus_areas = []
+        if analysis.white_blunders or analysis.black_blunders:
+            focus_areas.append('Reduce blunders by adding a final tactical scan before each move.')
+        if analysis.white_mistakes or analysis.black_mistakes:
+            focus_areas.append('Improve middlegame planning with candidate-move comparison.')
+        if analysis.white_inaccuracies or analysis.black_inaccuracies:
+            focus_areas.append('Sharpen opening move quality through pattern review and model lines.')
+        if not focus_areas:
+            focus_areas.append('Maintain consistency and deepen calculation in critical transitions.')
+
+        report = {
+            'stronger_side': stronger_side,
+            'white_total_errors': white_total,
+            'black_total_errors': black_total,
+            'focus_areas': focus_areas,
+            'summary': (
+                f"Stockfish evaluated this game at depth {analysis.depth}. "
+                f"{stronger_side} maintained the cleaner practical accuracy profile across the game."
+            ),
+        }
     return render(
         request,
         'ai_pipeline/game_analysis.html',
-        {'game': game, 'analysis': analysis, 'moves': moves},
+        {'game': game, 'analysis': analysis, 'moves': moves, 'report': report},
     )
 
 

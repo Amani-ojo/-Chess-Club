@@ -14,6 +14,22 @@ from .services.stockfish_analysis import analyse_game
 logger = logging.getLogger(__name__)
 
 
+def _resolve_member_for_player(player_name, tracked_username, tracked_member):
+    normalized = (player_name or '').strip()
+    if normalized and normalized.lower() == tracked_username.lower():
+        return tracked_member
+    if normalized:
+        opponent, _ = Member.objects.get_or_create(
+            lichess_username=normalized,
+            defaults={'display_name': normalized},
+        )
+        if opponent.display_name != normalized:
+            opponent.display_name = normalized
+            opponent.save(update_fields=['display_name'])
+        return opponent
+    return tracked_member
+
+
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def analyse_game_task(self, game_id):
     try:
@@ -87,10 +103,8 @@ def fetch_lichess_games_task(self, lichess_username, member_id, api_token=''):
         players = raw.get('players', {})
         white_name = players.get('white', {}).get('user', {}).get('name', '')
         black_name = players.get('black', {}).get('user', {}).get('name', '')
-        white_member = member if white_name.lower() == lichess_username.lower() else None
-        black_member = member if black_name.lower() == lichess_username.lower() else None
-        if white_member is None and black_member is None:
-            white_member = member
+        white_member = _resolve_member_for_player(white_name, lichess_username, member)
+        black_member = _resolve_member_for_player(black_name, lichess_username, member)
 
         winner = raw.get('winner', '')
         if winner == 'white':
