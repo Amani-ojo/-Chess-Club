@@ -6,17 +6,18 @@
 <section class="page-header">
     <div class="container">
         <h1><i class="bi bi-person"></i> Member Profile</h1>
+        <p class="text-muted mb-0">Member since {{ member.joined_date|date:"M Y" }}</p>
     </div>
 </section>
 
 <section class="section-block">
     <div class="container">
-        <div class="row">
+        <div class="row g-4">
 
-            <!-- Left column: player info card -->
-            <div class="col-lg-4 mb-4">
-                <div class="card text-center profile-card">
-                    <div class="card-body">
+            <!-- Left column: player info -->
+            <div class="col-lg-4">
+                <div class="card profile-card text-center h-100">
+                    <div class="card-body p-4">
                         {% if member.avatar %}
                         <img src="{{ member.avatar.url }}" alt="{{ member.display_name }}"
                              class="profile-avatar mb-3">
@@ -26,47 +27,55 @@
                         </div>
                         {% endif %}
 
-                        <h3>{{ member.display_name }}</h3>
-                        <p class="elo-rating-lg">{{ member.elo_rating }} ELO</p>
-                        <p class="text-muted">Member since {{ member.joined_date|date:"M Y" }}</p>
+                        <h3 class="profile-name mb-1">{{ member.display_name }}</h3>
+                        <p class="elo-rating-lg mb-3">{{ member.elo_rating }}</p>
 
-                        <hr>
+                        <hr class="my-3">
 
-                        <div class="row text-center">
+                        <div class="row g-2">
                             <div class="col-4">
-                                <h5 class="text-success mb-0">{{ member.wins }}</h5>
-                                <small class="text-muted">Wins</small>
+                                <div class="stat-mini">
+                                    <div class="v win">{{ member.wins }}</div>
+                                    <div class="l">Wins</div>
+                                </div>
                             </div>
                             <div class="col-4">
-                                <h5 class="text-danger mb-0">{{ member.losses }}</h5>
-                                <small class="text-muted">Losses</small>
+                                <div class="stat-mini">
+                                    <div class="v loss">{{ member.losses }}</div>
+                                    <div class="l">Losses</div>
+                                </div>
                             </div>
                             <div class="col-4">
-                                <h5 class="text-warning mb-0">{{ member.draws }}</h5>
-                                <small class="text-muted">Draws</small>
+                                <div class="stat-mini">
+                                    <div class="v draw">{{ member.draws }}</div>
+                                    <div class="l">Draws</div>
+                                </div>
                             </div>
                         </div>
 
-                        <hr>
+                        <hr class="my-3">
 
-                        <div class="row text-center">
+                        <div class="row g-2">
                             <div class="col-6">
-                                <h6 class="mb-0">{{ member.total_games }}</h6>
-                                <small class="text-muted">Total Games</small>
+                                <div class="stat-mini">
+                                    <div class="v">{{ member.total_games }}</div>
+                                    <div class="l">Total Games</div>
+                                </div>
                             </div>
                             <div class="col-6">
-                                <h6 class="mb-0">{{ member.win_percentage }}%</h6>
-                                <small class="text-muted">Win Rate</small>
+                                <div class="stat-mini">
+                                    <div class="v">{{ member.win_percentage }}%</div>
+                                    <div class="l">Win Rate</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right column: ELO chart + recent matches -->
+            <!-- Right column: chart + recent matches -->
             <div class="col-lg-8">
 
-                <!-- ELO History Chart -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0"><i class="bi bi-graph-up"></i> ELO Rating History</h5>
@@ -75,59 +84,58 @@
                         {% if elo_history %}
                         <canvas id="eloChart" height="200"></canvas>
                         {% else %}
-                        <p class="text-muted text-center">No rating history available yet.</p>
+                        <p class="text-muted text-center mb-0 py-3">No rating history available yet.</p>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- Recent Matches -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Matches</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         {% if recent_matches %}
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
-                                <thead>
+                                <thead style="background: var(--c-bg-alt);">
                                     <tr>
-                                        <th>Date</th>
+                                        <th class="ps-3">Date</th>
                                         <th>Opponent</th>
                                         <th class="text-center">Side</th>
-                                        <th class="text-center">Result</th>
+                                        <th class="text-center pe-3">Result</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for match in recent_matches %}
                                     <tr>
-                                        <td class="text-muted">{{ match.scheduled_at|date:"d M Y" }}</td>
+                                        <td class="text-muted small ps-3">{{ match.scheduled_at|date:"d M Y" }}</td>
                                         <td>
                                             {% if match.player_white == member %}
-                                                <a href="{% url 'member_profile' match.player_black.pk %}">
+                                                <a href="{% url 'member_profile' match.player_black.pk %}" class="player-link">
                                                     {{ match.player_black }}
                                                 </a>
                                             {% else %}
-                                                <a href="{% url 'member_profile' match.player_white.pk %}">
+                                                <a href="{% url 'member_profile' match.player_white.pk %}" class="player-link">
                                                     {{ match.player_white }}
                                                 </a>
                                             {% endif %}
                                         </td>
                                         <td class="text-center">
                                             {% if match.player_white == member %}
-                                                <span class="badge bg-light text-dark">White</span>
+                                                <span class="side-tag white">White</span>
                                             {% else %}
-                                                <span class="badge bg-dark">Black</span>
+                                                <span class="side-tag black">Black</span>
                                             {% endif %}
                                         </td>
-                                        <td class="text-center">
+                                        <td class="text-center pe-3">
                                             {% if match.result == 'white_wins' and match.player_white == member %}
-                                                <span class="badge bg-success">Won</span>
+                                                <span class="result-pill win">Won</span>
                                             {% elif match.result == 'black_wins' and match.player_black == member %}
-                                                <span class="badge bg-success">Won</span>
+                                                <span class="result-pill win">Won</span>
                                             {% elif match.result == 'draw' %}
-                                                <span class="badge bg-warning text-dark">Draw</span>
+                                                <span class="result-pill draw">Draw</span>
                                             {% else %}
-                                                <span class="badge bg-danger">Lost</span>
+                                                <span class="result-pill loss">Lost</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -136,7 +144,7 @@
                             </table>
                         </div>
                         {% else %}
-                        <p class="text-muted text-center mb-0">No completed matches yet.</p>
+                        <p class="text-muted text-center mb-0 py-4">No completed matches yet.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -151,6 +159,10 @@
 {% if elo_history %}
 <script>
     const ctx = document.getElementById('eloChart').getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, 240);
+    grad.addColorStop(0, 'rgba(201, 164, 76, 0.35)');
+    grad.addColorStop(1, 'rgba(201, 164, 76, 0.02)');
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -158,25 +170,42 @@
             datasets: [{
                 label: 'ELO Rating',
                 data: {{ elo_values|safe }},
-                borderColor: '#b58863',
-                backgroundColor: 'rgba(181, 136, 99, 0.1)',
+                borderColor: '#0b1726',
+                backgroundColor: grad,
                 fill: true,
-                tension: 0.3,
+                tension: 0.32,
                 pointRadius: 4,
-                pointBackgroundColor: '#b58863',
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#c9a44c',
+                pointBorderColor: '#0b1726',
+                pointBorderWidth: 2,
+                borderWidth: 2.5,
             }]
         },
         options: {
             responsive: true,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0b1726',
+                    titleColor: '#e0b95a',
+                    bodyColor: '#fff',
+                    padding: 10,
+                    cornerRadius: 8,
+                    displayColors: false,
+                }
             },
             scales: {
                 y: {
-                    title: { display: true, text: 'ELO Rating' }
+                    title: { display: true, text: 'ELO Rating', color: '#4a586a' },
+                    grid: { color: 'rgba(11,23,38,0.06)' },
+                    ticks: { color: '#4a586a' }
                 },
                 x: {
-                    title: { display: true, text: 'Date' }
+                    title: { display: true, text: 'Date', color: '#4a586a' },
+                    grid: { display: false },
+                    ticks: { color: '#4a586a' }
                 }
             }
         }

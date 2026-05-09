@@ -3,60 +3,88 @@
 {% block title %}Home — Eschen Chess Club{% endblock %}
 
 {% block content %}
-<!-- ==================== HERO SECTION ==================== -->
+<!-- ==================== HERO ==================== -->
 <section class="hero-section">
-    <div class="container text-center">
-        <h1 class="hero-title">Welcome to Eschen Chess Club</h1>
-        <p class="hero-subtitle">
-            Where strategy meets community. Join us for competitive and friendly chess
-            in the heart of Liechtenstein.
-        </p>
-        <div class="hero-buttons">
-            <a href="{% url 'leaderboard' %}" class="btn btn-primary btn-lg me-2">
-                <i class="bi bi-trophy"></i> View Leaderboard
-            </a>
-            <a href="{% url 'matches' %}" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-calendar-event"></i> Upcoming Matches
-            </a>
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="hero-eyebrow">Liechtenstein &middot; Est. in the village of Eschen</span>
+                <h1 class="hero-title">
+                    Where strategy meets <span class="accent">community.</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Friendly games, structured tournaments, and a tracked ELO ladder &mdash;
+                    open to every chess player in the region.
+                </p>
+                <div class="hero-buttons">
+                    <a href="{% url 'leaderboard' %}" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-trophy"></i> View Leaderboard
+                    </a>
+                    <a href="{% url 'matches' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-calendar-event"></i> Upcoming Matches
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="hero-art">
+                    <span class="hero-king">&#9818;</span>
+                </div>
+            </div>
         </div>
     </div>
 </section>
-<!-- ==================== END HERO ==================== -->
+
+
+<!-- ==================== STATS STRIP ==================== -->
+<section class="stats-strip">
+    <div class="container">
+        <div class="stats-card">
+            <div class="stat">
+                <div class="stat-value">{{ total_members|default:"—" }}</div>
+                <div class="stat-label">Active Members</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">{{ total_matches|default:"—" }}</div>
+                <div class="stat-label">Matches Played</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">{{ avg_elo|default:"—" }}</div>
+                <div class="stat-label">Average ELO</div>
+            </div>
+        </div>
+    </div>
+</section>
 
 
 <!-- ==================== TOP PLAYERS ==================== -->
 <section class="section-block">
     <div class="container">
-        <h2 class="section-title"><i class="bi bi-star"></i> Top Rated Players</h2>
+        <h2 class="section-title text-center"><i class="bi bi-star-fill"></i> Top Rated Players</h2>
 
         {% if top_players %}
-        <div class="row g-4">
+        <div class="row g-4 justify-content-center">
             {% for member in top_players %}
-            <div class="col-md-4 col-lg">
-                <div class="card player-card h-100 text-center">
+            <div class="col-sm-6 col-md-4 col-lg">
+                <div class="card player-card h-100">
                     <div class="card-body">
-                        <!-- Rank badge -->
                         <span class="rank-badge">#{{ forloop.counter }}</span>
 
-                        <!-- Avatar -->
                         {% if member.avatar %}
-                        <img src="{{ member.avatar.url }}" alt="{{ member.display_name }}"
-                             class="player-avatar mb-3">
+                        <img src="{{ member.avatar.url }}" alt="{{ member.display_name }}" class="player-avatar mb-3">
                         {% else %}
                         <div class="player-avatar-placeholder mb-3">
                             <i class="bi bi-person-fill"></i>
                         </div>
                         {% endif %}
 
-                        <!-- Name and rating -->
-                        <h5 class="card-title">
-                            <a href="{% url 'member_profile' member.pk %}">
-                                {{ member.display_name }}
-                            </a>
+                        <h5 class="card-title mb-1">
+                            <a href="{% url 'member_profile' member.pk %}">{{ member.display_name }}</a>
                         </h5>
-                        <p class="elo-rating">{{ member.elo_rating }} ELO</p>
-                        <p class="text-muted small">
-                            {{ member.wins }}W / {{ member.losses }}L / {{ member.draws }}D
+                        <p class="elo-rating mb-1">{{ member.elo_rating }}</p>
+                        <p class="wld-line mb-0">
+                            <span class="wld-w">{{ member.wins }}W</span> &middot;
+                            <span class="wld-l">{{ member.losses }}L</span> &middot;
+                            <span class="wld-d">{{ member.draws }}D</span>
                         </p>
                     </div>
                 </div>
@@ -64,39 +92,37 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-muted">No players registered yet.</p>
+        <p class="text-muted text-center">No players registered yet.</p>
         {% endif %}
     </div>
 </section>
-<!-- ==================== END TOP PLAYERS ==================== -->
 
 
 <!-- ==================== UPCOMING MATCHES ==================== -->
 <section class="section-block section-alt">
     <div class="container">
-        <h2 class="section-title"><i class="bi bi-calendar-event"></i> Upcoming Matches</h2>
+        <h2 class="section-title text-center"><i class="bi bi-calendar-event"></i> Upcoming Matches</h2>
 
         {% if upcoming_matches %}
         <div class="row g-4">
             {% for match in upcoming_matches %}
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-4">
                 <div class="card match-card h-100">
                     <div class="card-body text-center">
-                        <div class="match-players">
-                            <span class="player-white">{{ match.player_white }}</span>
+                        <div class="match-players mb-3">
+                            <span>{{ match.player_white }}</span>
                             <span class="vs-badge">VS</span>
-                            <span class="player-black">{{ match.player_black }}</span>
+                            <span>{{ match.player_black }}</span>
                         </div>
-                        <hr>
-                        <p class="text-muted mb-1">
+                        <p class="match-meta mb-1">
                             <i class="bi bi-clock"></i>
-                            {{ match.scheduled_at|date:"D, d M Y — H:i" }}
+                            {{ match.scheduled_at|date:"D, d M Y &mdash; H:i" }}
                         </p>
-                        <p class="text-muted mb-0">
+                        <p class="match-meta mb-0">
                             <i class="bi bi-geo-alt"></i> {{ match.venue }}
                         </p>
                     </div>
-                    <div class="card-footer text-center">
+                    <div class="card-footer text-center bg-transparent">
                         <a href="{% url 'match_detail' match.pk %}" class="btn btn-sm btn-outline-primary">
                             View Details
                         </a>
@@ -106,28 +132,27 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-muted">No upcoming matches scheduled.</p>
+        <p class="text-muted text-center">No upcoming matches scheduled.</p>
         {% endif %}
     </div>
 </section>
-<!-- ==================== END UPCOMING MATCHES ==================== -->
 
 
 <!-- ==================== ANNOUNCEMENTS ==================== -->
 <section class="section-block">
     <div class="container">
-        <h2 class="section-title"><i class="bi bi-megaphone"></i> Latest Announcements</h2>
+        <h2 class="section-title text-center"><i class="bi bi-megaphone"></i> Latest Announcements</h2>
 
         {% if announcements %}
         <div class="row g-4">
             {% for announcement in announcements %}
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-4">
                 <div class="card announcement-card h-100">
                     <div class="card-body">
                         <h5 class="card-title">{{ announcement.title }}</h5>
                         <p class="card-text">{{ announcement.body|truncatewords:30 }}</p>
                     </div>
-                    <div class="card-footer text-muted small">
+                    <div class="card-footer text-muted small bg-transparent">
                         <i class="bi bi-calendar"></i>
                         {{ announcement.published_at|date:"d M Y" }}
                         &middot; {{ announcement.author.username }}
@@ -137,9 +162,8 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-muted">No announcements at this time.</p>
+        <p class="text-muted text-center">No announcements at this time.</p>
         {% endif %}
     </div>
 </section>
-<!-- ==================== END ANNOUNCEMENTS ==================== -->
 {% endblock %}

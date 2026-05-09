@@ -1,17 +1,21 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth import login
+from django.db.models import Avg
+from django.urls import reverse
 from .models import Member, Match, Announcement, EloHistory
-from .forms import ContactForm
+from .forms import ContactForm, RegisterForm
 
 
 def home(request):
     """
     Home page view.
-    Shows welcome message, top 5 players, next 3 upcoming matches,
-    and latest published announcements.
+    Shows welcome message, club stats strip, top 5 players,
+    next 3 upcoming matches, and latest published announcements.
     """
-    top_players = Member.objects.filter(is_active=True).order_by('-elo_rating')[:5]
+    active_members = Member.objects.filter(is_active=True)
+    top_players = active_members.order_by('-elo_rating')[:5]
 
     upcoming_matches = Match.objects.filter(
         status='scheduled',
@@ -23,10 +27,15 @@ def home(request):
         published_at__lte=timezone.now()
     )[:3]
 
+    avg_elo = active_members.aggregate(v=Avg('elo_rating'))['v']
+
     context = {
         'top_players': top_players,
         'upcoming_matches': upcoming_matches,
         'announcements': announcements,
+        'total_members': active_members.count(),
+        'total_matches': Match.objects.filter(status='completed').count(),
+        'avg_elo': int(avg_elo) if avg_elo is not None else None,
     }
     return render(request, 'club/home.html', context)
 
@@ -135,3 +144,24 @@ def about(request):
         'form': form,
     }
     return render(request, 'club/about.html', context)
+
+
+def register(request):
+    """
+    Self-service registration for new club members.
+    Creates a User + Member, signs the user in, then redirects to their profile.
+    """
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f'Welcome to the club, {user.member.display_name}!')
+            return redirect(reverse('member_profile', args=[user.member.pk]))
+    else:
+        form = RegisterForm()
+
+    return render(request, 'registration/register.html', {'form': form})

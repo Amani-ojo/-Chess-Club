@@ -6,32 +6,41 @@
 <section class="page-header">
     <div class="container">
         <h1><i class="bi bi-trophy"></i> Leaderboard</h1>
-        <p class="text-muted">Club members ranked by performance</p>
+        <p class="text-muted mb-0">Club members ranked by performance</p>
     </div>
 </section>
 
 <section class="section-block">
     <div class="container">
 
-        <!-- Sort toggles -->
-        <div class="mb-4 text-end">
-            <span class="me-2 text-muted">Sort by:</span>
-            <a href="?sort=elo"
-               class="btn btn-sm {% if sort_by == 'elo' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-                ELO Rating
-            </a>
-            <a href="?sort=wins"
-               class="btn btn-sm {% if sort_by == 'wins' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-                Win %
-            </a>
+        <!-- Sort segmented control -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <span class="eyebrow mb-0">Standings</span>
+            </div>
+            <div>
+                <span class="me-2 text-muted small">Sort by:</span>
+                <ul class="nav nav-pills" role="tablist">
+                    <li class="nav-item">
+                        <a href="?sort=elo" class="nav-link {% if sort_by == 'elo' %}active{% endif %}">
+                            ELO Rating
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="?sort=wins" class="nav-link {% if sort_by == 'wins' %}active{% endif %}">
+                            Win %
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         {% if members %}
         <div class="table-responsive">
-            <table class="table table-hover leaderboard-table align-middle">
+            <table class="table table-hover leaderboard-table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th class="text-center" style="width: 60px;">Rank</th>
+                        <th class="text-center" style="width: 80px;">Rank</th>
                         <th>Player</th>
                         <th class="text-center">ELO</th>
                         <th class="text-center">W</th>
@@ -43,7 +52,7 @@
                 </thead>
                 <tbody>
                     {% for member in members %}
-                    <tr>
+                    <tr class="{% if forloop.counter == 1 %}podium-1{% elif forloop.counter == 2 %}podium-2{% elif forloop.counter == 3 %}podium-3{% endif %}">
                         <td class="text-center fw-bold">
                             {% if forloop.counter == 1 %}
                                 <span class="rank-medal gold">&#9813;</span>
@@ -52,11 +61,11 @@
                             {% elif forloop.counter == 3 %}
                                 <span class="rank-medal bronze">&#9813;</span>
                             {% else %}
-                                {{ forloop.counter }}
+                                <span class="text-muted">{{ forloop.counter }}</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{% url 'member_profile' member.pk %}" class="player-link">
+                            <a href="{% url 'member_profile' member.pk %}" class="player-link d-inline-flex align-items-center">
                                 {% if member.avatar %}
                                 <img src="{{ member.avatar.url }}" alt="" class="leaderboard-avatar">
                                 {% else %}
@@ -67,19 +76,22 @@
                                 {{ member.display_name }}
                             </a>
                         </td>
-                        <td class="text-center fw-bold">{{ member.elo_rating }}</td>
-                        <td class="text-center text-success">{{ member.wins }}</td>
-                        <td class="text-center text-danger">{{ member.losses }}</td>
-                        <td class="text-center text-warning">{{ member.draws }}</td>
-                        <td class="text-center">{{ member.total_games }}</td>
-                        <td class="text-center">{{ member.win_percentage }}%</td>
+                        <td class="text-center elo-cell">{{ member.elo_rating }}</td>
+                        <td class="text-center"><span class="wld-line"><span class="wld-w">{{ member.wins }}</span></span></td>
+                        <td class="text-center"><span class="wld-line"><span class="wld-l">{{ member.losses }}</span></span></td>
+                        <td class="text-center"><span class="wld-line"><span class="wld-d">{{ member.draws }}</span></span></td>
+                        <td class="text-center text-muted">{{ member.total_games }}</td>
+                        <td class="text-center fw-semibold">{{ member.win_percentage }}%</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         {% else %}
-        <p class="text-muted text-center">No members registered yet.</p>
+        <div class="text-center py-5">
+            <i class="bi bi-people display-4 text-muted"></i>
+            <p class="text-muted mt-3 mb-0">No members registered yet.</p>
+        </div>
         {% endif %}
     </div>
 </section>

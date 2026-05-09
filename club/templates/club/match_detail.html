@@ -6,122 +6,134 @@
 <section class="page-header">
     <div class="container">
         <h1><i class="bi bi-lightning"></i> Match Details</h1>
+        <p class="text-muted mb-0">{{ match.scheduled_at|date:"D, d M Y &mdash; H:i" }}</p>
     </div>
 </section>
 
 <section class="section-block">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8">
+            <div class="col-lg-9">
                 <div class="card match-detail-card">
-                    <div class="card-body">
+                    <div class="card-body p-4 p-md-5">
 
                         <!-- Players -->
-                        <div class="match-detail-players text-center mb-4">
-                            <div class="row align-items-center">
-                                <div class="col-5">
-                                    <div class="player-side">
-                                        {% if match.player_white.avatar %}
-                                        <img src="{{ match.player_white.avatar.url }}"
-                                             alt="{{ match.player_white }}"
-                                             class="match-detail-avatar">
-                                        {% else %}
-                                        <div class="match-detail-avatar-placeholder">
-                                            <i class="bi bi-person-fill"></i>
-                                        </div>
-                                        {% endif %}
-                                        <h5 class="mt-2">
-                                            <a href="{% url 'member_profile' match.player_white.pk %}">
-                                                {{ match.player_white }}
-                                            </a>
-                                        </h5>
-                                        <span class="badge bg-light text-dark">White</span>
-                                        <p class="text-muted small mt-1">{{ match.player_white.elo_rating }} ELO</p>
+                        <div class="row align-items-center text-center">
+                            <div class="col-5">
+                                <div class="player-side">
+                                    {% if match.player_white.avatar %}
+                                    <img src="{{ match.player_white.avatar.url }}"
+                                         alt="{{ match.player_white }}"
+                                         class="match-detail-avatar mb-3">
+                                    {% else %}
+                                    <div class="match-detail-avatar-placeholder mb-3">
+                                        <i class="bi bi-person-fill"></i>
                                     </div>
+                                    {% endif %}
+                                    <h5 class="mb-2">
+                                        <a href="{% url 'member_profile' match.player_white.pk %}">
+                                            {{ match.player_white }}
+                                        </a>
+                                    </h5>
+                                    <span class="side-tag white">White</span>
+                                    <p class="elo-rating mt-2 mb-0" style="font-size: 1.1rem;">{{ match.player_white.elo_rating }}</p>
                                 </div>
-                                <div class="col-2">
-                                    <span class="vs-badge-lg">VS</span>
-                                </div>
-                                <div class="col-5">
-                                    <div class="player-side">
-                                        {% if match.player_black.avatar %}
-                                        <img src="{{ match.player_black.avatar.url }}"
-                                             alt="{{ match.player_black }}"
-                                             class="match-detail-avatar">
-                                        {% else %}
-                                        <div class="match-detail-avatar-placeholder">
-                                            <i class="bi bi-person-fill"></i>
-                                        </div>
-                                        {% endif %}
-                                        <h5 class="mt-2">
-                                            <a href="{% url 'member_profile' match.player_black.pk %}">
-                                                {{ match.player_black }}
-                                            </a>
-                                        </h5>
-                                        <span class="badge bg-dark">Black</span>
-                                        <p class="text-muted small mt-1">{{ match.player_black.elo_rating }} ELO</p>
+                            </div>
+                            <div class="col-2">
+                                <span class="vs-badge-lg">VS</span>
+                            </div>
+                            <div class="col-5">
+                                <div class="player-side">
+                                    {% if match.player_black.avatar %}
+                                    <img src="{{ match.player_black.avatar.url }}"
+                                         alt="{{ match.player_black }}"
+                                         class="match-detail-avatar mb-3">
+                                    {% else %}
+                                    <div class="match-detail-avatar-placeholder mb-3">
+                                        <i class="bi bi-person-fill"></i>
                                     </div>
+                                    {% endif %}
+                                    <h5 class="mb-2">
+                                        <a href="{% url 'member_profile' match.player_black.pk %}">
+                                            {{ match.player_black }}
+                                        </a>
+                                    </h5>
+                                    <span class="side-tag black">Black</span>
+                                    <p class="elo-rating mt-2 mb-0" style="font-size: 1.1rem;">{{ match.player_black.elo_rating }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <hr>
+                        <hr class="my-4">
 
-                        <!-- Match info -->
-                        <div class="row text-center mb-3">
-                            <div class="col-md-4 mb-2">
-                                <strong>Status</strong><br>
-                                <span class="badge
-                                    {% if match.status == 'completed' %}bg-success
-                                    {% elif match.status == 'in_progress' %}bg-warning text-dark
-                                    {% elif match.status == 'cancelled' %}bg-danger
-                                    {% else %}bg-info
-                                    {% endif %}">
-                                    {{ match.get_status_display }}
-                                </span>
+                        <!-- Match info grid -->
+                        <div class="row g-3 text-center">
+                            <div class="col-md-4">
+                                <div class="stat-mini">
+                                    <div class="l mb-2">Status</div>
+                                    {% if match.status == 'completed' %}
+                                        <span class="result-pill win">{{ match.get_status_display }}</span>
+                                    {% elif match.status == 'in_progress' %}
+                                        <span class="result-pill draw">{{ match.get_status_display }}</span>
+                                    {% elif match.status == 'cancelled' %}
+                                        <span class="result-pill loss">{{ match.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="result-pill" style="background: rgba(11,23,38,.08); color: var(--c-navy-700);">{{ match.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <strong>Result</strong><br>
-                                {% if match.result == 'white_wins' %}
-                                    <span class="badge bg-success">White Wins (1—0)</span>
-                                {% elif match.result == 'black_wins' %}
-                                    <span class="badge bg-danger">Black Wins (0—1)</span>
-                                {% elif match.result == 'draw' %}
-                                    <span class="badge bg-warning text-dark">Draw (½—½)</span>
-                                {% else %}
-                                    <span class="text-muted">Pending</span>
-                                {% endif %}
+                            <div class="col-md-4">
+                                <div class="stat-mini">
+                                    <div class="l mb-2">Result</div>
+                                    {% if match.result == 'white_wins' %}
+                                        <span class="result-pill win">White Wins (1&mdash;0)</span>
+                                    {% elif match.result == 'black_wins' %}
+                                        <span class="result-pill loss">Black Wins (0&mdash;1)</span>
+                                    {% elif match.result == 'draw' %}
+                                        <span class="result-pill draw">Draw (&frac12;&mdash;&frac12;)</span>
+                                    {% else %}
+                                        <span class="text-muted">Pending</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="col-md-4 mb-2">
-                                <strong>Date & Time</strong><br>
-                                <span class="text-muted">{{ match.scheduled_at|date:"D, d M Y — H:i" }}</span>
+                            <div class="col-md-4">
+                                <div class="stat-mini">
+                                    <div class="l mb-2">Date &amp; Time</div>
+                                    <span class="text-muted small">{{ match.scheduled_at|date:"D, d M Y &mdash; H:i" }}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row text-center">
-                            <div class="col-md-6 mb-2">
-                                <strong>Venue</strong><br>
-                                <span class="text-muted"><i class="bi bi-geo-alt"></i> {{ match.venue }}</span>
+                        <hr class="my-4">
+
+                        <div class="row g-3 text-center">
+                            <div class="col-md-6">
+                                <div class="stat-mini">
+                                    <div class="l mb-2">Venue</div>
+                                    <span class="text-muted"><i class="bi bi-geo-alt"></i> {{ match.venue }}</span>
+                                </div>
                             </div>
                             {% if match.round_number %}
-                            <div class="col-md-6 mb-2">
-                                <strong>Round</strong><br>
-                                <span class="text-muted">{{ match.round_number }}</span>
+                            <div class="col-md-6">
+                                <div class="stat-mini">
+                                    <div class="l mb-2">Round</div>
+                                    <span class="text-muted">{{ match.round_number }}</span>
+                                </div>
                             </div>
                             {% endif %}
                         </div>
 
                         {% if match.notes %}
-                        <hr>
+                        <hr class="my-4">
                         <div>
-                            <strong>Notes</strong>
-                            <p class="text-muted mt-1">{{ match.notes }}</p>
+                            <div class="eyebrow">Notes</div>
+                            <p class="text-muted mb-0">{{ match.notes }}</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="text-center mt-3">
+                <div class="text-center mt-4">
                     <a href="{% url 'matches' %}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left"></i> Back to Matches
                     </a>
