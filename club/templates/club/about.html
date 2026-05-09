@@ -7,58 +7,87 @@
 <section class="page-header">
     <div class="container">
         <h1><i class="bi bi-info-circle"></i> About Us</h1>
-        <p class="text-muted">Learn more about the Eschen Chess Club</p>
+        <p class="text-muted mb-0">Strategy, community, and decades of chess in Liechtenstein</p>
     </div>
 </section>
 
 <section class="section-block">
     <div class="container">
-        <div class="row">
+        <div class="row g-4">
 
-            <!-- Left column: Club info -->
-            <div class="col-lg-7 mb-4">
+            <!-- Story / info -->
+            <div class="col-lg-7">
                 <div class="card h-100">
-                    <div class="card-body">
-                        <h3>Our Story</h3>
+                    <div class="card-body p-4 p-md-5">
+                        <span class="eyebrow">Our Story</span>
+                        <h2 class="mb-3" style="font-size: 1.9rem;">A village club with a serious board.</h2>
                         <p>
                             The Eschen Chess Club brings together chess enthusiasts of all skill levels
-                            in the village of Eschen, Liechtenstein. Whether you are a seasoned player
-                            or just learning the game, our doors are open.
+                            in the village of Eschen, Liechtenstein. Whether you are a seasoned tournament
+                            player or have just learned the moves, our doors are open.
                         </p>
                         <p>
-                            We meet regularly for friendly games, structured tournaments, and coaching
-                            sessions. Our ELO rating system tracks performance so members can see
-                            their progress over time.
+                            We meet regularly for friendly games, structured club tournaments, and
+                            coaching sessions. Our FIDE-style ELO rating system tracks every member's
+                            progress over time so you can watch your game evolve.
                         </p>
 
-                        <hr>
+                        <hr class="my-4">
 
-                        <h5><i class="bi bi-clock"></i> Meeting Times</h5>
-                        <p>Tuesdays and Thursdays, 18:00 — 21:00</p>
-
-                        <h5><i class="bi bi-geo-alt"></i> Location</h5>
-                        <p>Eschen Dorfplatz, 9492 Eschen, Liechtenstein</p>
-
-                        <h5><i class="bi bi-people"></i> Membership</h5>
-                        <p>
-                            Membership is open to everyone. Contact us using the form or
-                            drop by during our meeting hours.
-                        </p>
+                        <div class="row g-4">
+                            <div class="col-sm-6">
+                                <div class="d-flex">
+                                    <i class="bi bi-clock fs-4 text-warning me-3" style="color: var(--c-gold-600) !important;"></i>
+                                    <div>
+                                        <h5 class="mb-1" style="font-size: 1rem;">Meeting Times</h5>
+                                        <p class="mb-0 small">Tuesdays &amp; Thursdays<br>18:00 &mdash; 21:00</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex">
+                                    <i class="bi bi-geo-alt fs-4 me-3" style="color: var(--c-gold-600);"></i>
+                                    <div>
+                                        <h5 class="mb-1" style="font-size: 1rem;">Location</h5>
+                                        <p class="mb-0 small">Eschen Dorfplatz<br>9492 Eschen, Liechtenstein</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex">
+                                    <i class="bi bi-people fs-4 me-3" style="color: var(--c-gold-600);"></i>
+                                    <div>
+                                        <h5 class="mb-1" style="font-size: 1rem;">Membership</h5>
+                                        <p class="mb-0 small">Open to all skill levels.<br>Drop in anytime during meetings.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="d-flex">
+                                    <i class="bi bi-trophy fs-4 me-3" style="color: var(--c-gold-600);"></i>
+                                    <div>
+                                        <h5 class="mb-1" style="font-size: 1rem;">Ratings</h5>
+                                        <p class="mb-0 small">FIDE-style ELO with adaptive K-factor for fast-rising players.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right column: Contact form -->
-            <div class="col-lg-5 mb-4">
+            <!-- Contact form -->
+            <div class="col-lg-5">
                 <div class="card h-100">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-envelope"></i> Contact Us</h5>
+                        <h5 class="mb-0"><i class="bi bi-envelope"></i> Get in touch</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-3">Have a question or want to visit a meeting? Send us a note.</p>
                         <form method="post">
                             {% csrf_token %}
                             {{ form|crispy }}
-                            <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <button type="submit" class="btn btn-primary w-100 mt-2">
                                 <i class="bi bi-send"></i> Send Message
                             </button>
                         </form>

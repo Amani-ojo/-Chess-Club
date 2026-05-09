@@ -17,6 +17,20 @@ class Member(models.Model):
     joined_date = models.DateField()
     is_active = models.BooleanField(default=True)
 
+    # Lichess integration — used by the AI pipeline to fetch and analyse games.
+    # Both fields are optional; members can fill them in from their profile page.
+    lichess_username = models.CharField(
+        max_length=30,
+        blank=True,
+        help_text='Your public Lichess username, used to fetch your games for analysis.',
+    )
+    lichess_token = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Personal Lichess API token (lichess.org/account/oauth/token). '
+                  'Optional — only needed for higher rate limits or accessing private studies.',
+    )
+
     class Meta:
         ordering = ['-elo_rating']
 

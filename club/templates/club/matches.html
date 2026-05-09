@@ -6,7 +6,7 @@
 <section class="page-header">
     <div class="container">
         <h1><i class="bi bi-calendar-event"></i> Matches</h1>
-        <p class="text-muted">Upcoming fixtures and completed results</p>
+        <p class="text-muted mb-0">Upcoming fixtures and completed results</p>
     </div>
 </section>
 
@@ -16,48 +16,45 @@
         <!-- Tab navigation -->
         <ul class="nav nav-pills mb-4" role="tablist">
             <li class="nav-item">
-                <a class="nav-link {% if tab == 'upcoming' %}active{% endif %}"
-                   href="?tab=upcoming">
+                <a class="nav-link {% if tab == 'upcoming' %}active{% endif %}" href="?tab=upcoming">
                     <i class="bi bi-clock"></i> Upcoming
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if tab == 'results' %}active{% endif %}"
-                   href="?tab=results">
+                <a class="nav-link {% if tab == 'results' %}active{% endif %}" href="?tab=results">
                     <i class="bi bi-check-circle"></i> Results
                 </a>
             </li>
         </ul>
 
-        <!-- Upcoming matches -->
+        <!-- Upcoming -->
         {% if tab == 'upcoming' %}
-        <div class="row g-4">
             {% if upcoming %}
+            <div class="row g-4">
                 {% for match in upcoming %}
                 <div class="col-md-6 col-lg-4">
                     <div class="card match-card h-100">
                         <div class="card-body text-center">
-                            <div class="match-players">
-                                <span class="player-white">{{ match.player_white }}</span>
+                            <div class="match-players mb-3">
+                                <span>{{ match.player_white }}</span>
                                 <span class="vs-badge">VS</span>
-                                <span class="player-black">{{ match.player_black }}</span>
+                                <span>{{ match.player_black }}</span>
                             </div>
-                            <hr>
-                            <p class="text-muted mb-1">
+                            <p class="match-meta mb-1">
                                 <i class="bi bi-clock"></i>
-                                {{ match.scheduled_at|date:"D, d M Y — H:i" }}
+                                {{ match.scheduled_at|date:"D, d M Y &mdash; H:i" }}
                             </p>
-                            <p class="text-muted mb-1">
+                            <p class="match-meta mb-1">
                                 <i class="bi bi-geo-alt"></i> {{ match.venue }}
                             </p>
                             {% if match.round_number %}
-                            <p class="text-muted mb-0">
+                            <p class="match-meta mb-2">
                                 <i class="bi bi-hash"></i> Round {{ match.round_number }}
                             </p>
                             {% endif %}
-                            <span class="badge bg-info mt-2">{{ match.get_status_display }}</span>
+                            <span class="result-pill draw">{{ match.get_status_display }}</span>
                         </div>
-                        <div class="card-footer text-center">
+                        <div class="card-footer text-center bg-transparent">
                             <a href="{% url 'match_detail' match.pk %}" class="btn btn-sm btn-outline-primary">
                                 View Details
                             </a>
@@ -65,61 +62,67 @@
                     </div>
                 </div>
                 {% endfor %}
+            </div>
             {% else %}
-                <div class="col-12">
-                    <p class="text-muted text-center">No upcoming matches scheduled.</p>
-                </div>
+            <div class="text-center py-5">
+                <i class="bi bi-calendar2-x display-4 text-muted"></i>
+                <p class="text-muted mt-3 mb-0">No upcoming matches scheduled.</p>
+            </div>
             {% endif %}
-        </div>
 
-        <!-- Completed results -->
+        <!-- Results -->
         {% else %}
-        <div class="table-responsive">
             {% if results %}
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>White</th>
-                        <th class="text-center">Result</th>
-                        <th>Black</th>
-                        <th>Venue</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for match in results %}
-                    <tr>
-                        <td class="text-muted">{{ match.scheduled_at|date:"d M Y" }}</td>
-                        <td class="{% if match.result == 'white_wins' %}fw-bold text-success{% endif %}">
-                            {{ match.player_white }}
-                        </td>
-                        <td class="text-center">
-                            {% if match.result == 'white_wins' %}
-                                <span class="badge bg-success">1 — 0</span>
-                            {% elif match.result == 'black_wins' %}
-                                <span class="badge bg-danger">0 — 1</span>
-                            {% else %}
-                                <span class="badge bg-warning text-dark">½ — ½</span>
-                            {% endif %}
-                        </td>
-                        <td class="{% if match.result == 'black_wins' %}fw-bold text-success{% endif %}">
-                            {{ match.player_black }}
-                        </td>
-                        <td class="text-muted">{{ match.venue }}</td>
-                        <td>
-                            <a href="{% url 'match_detail' match.pk %}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead style="background: var(--c-bg-alt);">
+                            <tr>
+                                <th>Date</th>
+                                <th>White</th>
+                                <th class="text-center">Result</th>
+                                <th>Black</th>
+                                <th>Venue</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for match in results %}
+                            <tr>
+                                <td class="text-muted small">{{ match.scheduled_at|date:"d M Y" }}</td>
+                                <td class="{% if match.result == 'white_wins' %}fw-bold{% endif %}">
+                                    {{ match.player_white }}
+                                </td>
+                                <td class="text-center">
+                                    {% if match.result == 'white_wins' %}
+                                        <span class="result-pill win">1 &mdash; 0</span>
+                                    {% elif match.result == 'black_wins' %}
+                                        <span class="result-pill loss">0 &mdash; 1</span>
+                                    {% else %}
+                                        <span class="result-pill draw">&frac12; &mdash; &frac12;</span>
+                                    {% endif %}
+                                </td>
+                                <td class="{% if match.result == 'black_wins' %}fw-bold{% endif %}">
+                                    {{ match.player_black }}
+                                </td>
+                                <td class="text-muted small">{{ match.venue }}</td>
+                                <td>
+                                    <a href="{% url 'match_detail' match.pk %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             {% else %}
-            <p class="text-muted text-center">No completed matches yet.</p>
+            <div class="text-center py-5">
+                <i class="bi bi-clipboard-x display-4 text-muted"></i>
+                <p class="text-muted mt-3 mb-0">No completed matches yet.</p>
+            </div>
             {% endif %}
-        </div>
         {% endif %}
 
     </div>

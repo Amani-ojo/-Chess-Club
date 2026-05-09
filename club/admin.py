@@ -53,9 +53,36 @@ def _apply_elo(match: Match) -> None:
 
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
-    list_display = ["display_name", "elo_rating", "wins", "losses", "draws", "is_active"]
+    list_display = [
+        "display_name", "elo_rating", "wins", "losses", "draws",
+        "lichess_username", "has_lichess_token", "is_active",
+    ]
     list_filter = ["is_active"]
-    search_fields = ["display_name", "user__username"]
+    search_fields = ["display_name", "user__username", "lichess_username"]
+    readonly_fields = ["lichess_token_status"]
+    fieldsets = (
+        (None, {
+            "fields": ("user", "display_name", "avatar", "joined_date", "is_active"),
+        }),
+        ("Rating & record", {
+            "fields": ("elo_rating", "wins", "losses", "draws"),
+        }),
+        ("Lichess integration", {
+            "fields": ("lichess_username", "lichess_token", "lichess_token_status"),
+            "description": "API tokens are stored as-entered. Avoid pasting them into "
+                           "logs, screenshots, or shared screens.",
+        }),
+    )
+
+    @admin.display(boolean=True, description="Lichess token?")
+    def has_lichess_token(self, obj):
+        return bool(obj.lichess_token)
+
+    @admin.display(description="Token status")
+    def lichess_token_status(self, obj):
+        if not obj.lichess_token:
+            return "— not set —"
+        return f"Set (•••• last 4: {obj.lichess_token[-4:]})"
 
 
 @admin.register(Match)
