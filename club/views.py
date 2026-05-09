@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
 from django.urls import reverse
 from .models import Member, Match, Announcement, EloHistory
-from .forms import ContactForm, RegisterForm
+from .forms import ContactForm, ProfileEditForm, RegisterForm
 
 
 def home(request):
@@ -165,3 +166,23 @@ def register(request):
         form = RegisterForm()
 
     return render(request, 'registration/register.html', {'form': form})
+
+
+@login_required
+def profile_edit(request):
+    """
+    Lets a logged-in member update their display name, avatar, and Lichess
+    credentials. Members can only edit their own profile.
+    """
+    member = get_object_or_404(Member, user=request.user)
+
+    if request.method == 'POST':
+        form = ProfileEditForm(request.POST, request.FILES, instance=member)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect(reverse('member_profile', args=[member.pk]))
+    else:
+        form = ProfileEditForm(instance=member)
+
+    return render(request, 'club/profile_edit.html', {'form': form, 'member': member})

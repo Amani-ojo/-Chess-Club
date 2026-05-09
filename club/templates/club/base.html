@@ -74,6 +74,7 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 {% if user.member %}
                                 <li><a class="dropdown-item" href="{% url 'member_profile' user.member.pk %}"><i class="bi bi-person"></i> My Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'profile_edit' %}"><i class="bi bi-pencil-square"></i> Edit Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% endif %}
                                 <li>

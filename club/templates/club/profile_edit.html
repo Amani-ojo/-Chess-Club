@@ -1,0 +1,57 @@
+{% extends 'club/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Edit profile — Eschen Chess Club{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-pencil-square"></i> Edit Profile</h1>
+        <p class="text-muted mb-0">Update your display name, avatar, and Lichess credentials.</p>
+    </div>
+</section>
+
+<section class="section-block">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-body p-4 p-md-5">
+                        <span class="eyebrow">Your details</span>
+                        <h3 class="mb-4" style="font-size: 1.5rem;">{{ member.display_name }}</h3>
+
+                        <form method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            {{ form|crispy }}
+
+                            {% if member.lichess_token %}
+                            <div class="alert alert-info small d-flex align-items-start mt-2">
+                                <i class="bi bi-shield-lock me-2 mt-1"></i>
+                                <div>
+                                    A Lichess API token is currently saved for your account.
+                                    Leave the token field blank to keep it; type a new one to replace it.
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check2"></i> Save changes
+                                </button>
+                                <a href="{% url 'member_profile' member.pk %}" class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <p class="small text-muted text-center mt-3 mb-0">
+                    <i class="bi bi-info-circle"></i>
+                    Your Lichess username is used by the AI pipeline to fetch and analyse your public games.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
