@@ -22,11 +22,11 @@ def member_games_for_player(member):
 
 def build_elo_history_for_member(member):
     """
-    Display-only Elo trace from *this member's* imported games in chronological order.
+    Display-only trace from this member's imports in time order.
 
-    Previous implementation replayed every `Game` in the database and used date-only x labels,
-    which (a) skewed the curve for sparse players and (b) broke Chart.js category axes when
-    several games shared the same calendar day.
+    The signed-in member starts at their club OTB `elo_rating`; opponents start at their stored
+    OTB the first time they appear, so the path is not artificially dragged by assuming everyone
+    is 1500. (Chart Y-axis is fixed with padding in the dashboard so it does not jitter each refresh.)
     """
     if not member:
         return []
@@ -37,13 +37,15 @@ def build_elo_history_for_member(member):
         .order_by('played_at', 'id')
     )
 
-    start = 1500.0
-    ratings: dict[int, float] = {member.id: start}
+    baseline = float(member.elo_rating)
+    ratings: dict[int, float] = {member.id: baseline}
     history: list[dict] = []
     k_factor = 20
 
-    def rating_for(mid: int) -> float:
-        return ratings.setdefault(mid, start)
+    def rating_or_seed(mid: int, row_member) -> float:
+        if mid not in ratings:
+            ratings[mid] = float(getattr(row_member, 'elo_rating', 1500.0))
+        return ratings[mid]
 
     for game in games:
         white_id = game.player_white_id
@@ -51,13 +53,16 @@ def build_elo_history_for_member(member):
         if white_id == black_id:
             continue
 
-        white_rating = rating_for(white_id)
-        black_rating = rating_for(black_id)
+        white_rating = rating_or_seed(white_id, game.player_white)
+        black_rating = rating_or_seed(black_id, game.player_black)
 
         expected_white = 1.0 / (1.0 + (10 ** ((black_rating - white_rating) / 400.0)))
         expected_black = 1.0 - expected_white
 
         res = (game.result or '').strip()
+        if not res:
+            continue
+
         if res == '1-0':
             score_white, score_black = 1.0, 0.0
         elif res == '0-1':

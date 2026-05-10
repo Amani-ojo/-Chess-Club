@@ -74,7 +74,10 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white fw-semibold">Elo curve (imported online games)</div>
                 <div class="card-body">
-                    <p class="small text-muted mb-2">Synthetic rating path from Lichess imports only — not the club OTB ELO on your public profile.</p>
+                    <p class="small text-muted mb-2">
+                        Synthetic path from imports in chronological order (each player starts from their stored club OTB when first seen).
+                        Updates do not overwrite your leaderboard OTB rating.
+                    </p>
                     <canvas id="eloProgressChart" height="220"></canvas>
                 </div>
             </div>
@@ -151,13 +154,36 @@
         animation: false,
     };
 
+    function eloVerticalBounds(series) {
+        const ys = (series || []).filter((v) => typeof v === 'number' && Number.isFinite(v));
+        if (!ys.length) {
+            return { min: 1350, max: 1650 };
+        }
+        let lo = Math.min(...ys);
+        let hi = Math.max(...ys);
+        const pad = Math.max(40, Math.round((hi - lo) * 0.12));
+        lo -= pad;
+        hi += pad;
+        lo = Math.max(600, Math.floor(lo / 10) * 10);
+        hi = Math.min(3000, Math.ceil(hi / 10) * 10);
+        if (hi - lo < 120) {
+            const mid = (hi + lo) / 2;
+            lo = Math.max(600, mid - 60);
+            hi = Math.min(3000, mid + 60);
+        }
+        return { min: lo, max: hi };
+    }
+
     function renderElo(data) {
         const labels = (data || []).map(p => p.x);
         const values = (data || []).map(p => p.y);
         const ctx = document.getElementById('eloProgressChart').getContext('2d');
+        const yb = eloVerticalBounds(values);
         if (eloChart) {
             eloChart.data.labels = labels;
             eloChart.data.datasets[0].data = values;
+            eloChart.options.scales.y.min = yb.min;
+            eloChart.options.scales.y.max = yb.max;
             eloChart.update('none');
             return;
         }
@@ -171,7 +197,8 @@
                     borderColor: '#1f5f99',
                     backgroundColor: 'rgba(31,95,153,0.15)',
                     fill: true,
-                    tension: 0.15
+                    tension: 0,
+                    spanGaps: true,
                 }]
             },
             options: {
@@ -179,6 +206,11 @@
                 scales: {
                     x: {
                         ticks: { maxRotation: 45, minRotation: 30, autoSkip: true, maxTicksLimit: 12 },
+                    },
+                    y: {
+                        min: yb.min,
+                        max: yb.max,
+                        ticks: { precision: 0, maxTicksLimit: 8 },
                     },
                 },
             },
