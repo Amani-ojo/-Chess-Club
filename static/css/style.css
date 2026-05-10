@@ -11,3 +11,51 @@ main {
 .table-rank-col {
     width: 4rem;
 }
+
+.letter-spacing {
+    letter-spacing: 0.08em;
+}
+
+.home-stat-row {
+    --bs-gutter-y: 0.75rem;
+}
+
+.home-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.home-stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--bs-heading-color);
+}
+
+.home-stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-secondary-color);
+}
+
+.home-section .card {
+    border-radius: 0.5rem;
+}
+
+.home-rank-list .list-group-item {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+.home-announcements .home-announcement-item:last-child {
+    border-bottom: 0 !important;
+}
+
+@media (min-width: 992px) {
+    .home-announcements {
+        max-height: 28rem;
+        overflow-y: auto;
+    }
+}

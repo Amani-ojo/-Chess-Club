@@ -20,11 +20,20 @@ from .services.dashboard_metrics import build_dashboard_metrics, member_games_fo
 
 def home(request):
     now = timezone.now()
-    top_players = Member.objects.order_by('-elo_rating')[:5]
-    upcoming_matches = Match.objects.filter(status=Match.STATUS_SCHEDULED).order_by('scheduled_at')[:10]
-    announcements = Announcement.objects.filter(published_at__lte=now).order_by('-published_at')[:8]
-    members = Member.objects.all()[:10]
-    recent_games = Game.objects.select_related('player_white', 'player_black')[:10]
+    top_players = Member.objects.order_by('-elo_rating', '-wins')[:5]
+    upcoming_matches = Match.objects.filter(status=Match.STATUS_SCHEDULED).select_related(
+        'white_player', 'black_player'
+    ).order_by('scheduled_at')[:8]
+    announcements = Announcement.objects.filter(published_at__lte=now).select_related('author').order_by(
+        '-published_at'
+    )[:6]
+    recent_members = Member.objects.order_by('-pk')[:12]
+    recent_games = Game.objects.select_related('player_white', 'player_black')[:8]
+    home_stats = {
+        'member_total': Member.objects.count(),
+        'upcoming_total': Match.objects.filter(status=Match.STATUS_SCHEDULED).count(),
+        'announcement_total': Announcement.objects.filter(published_at__lte=now).count(),
+    }
     return render(
         request,
         'club/home.html',
@@ -32,8 +41,9 @@ def home(request):
             'top_players': top_players,
             'upcoming_matches': upcoming_matches,
             'announcements': announcements,
-            'members': members,
+            'recent_members': recent_members,
             'recent_games': recent_games,
+            'home_stats': home_stats,
         },
     )
 
