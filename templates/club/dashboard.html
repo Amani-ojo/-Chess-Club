@@ -95,7 +95,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
                     <span>Imported online · standings</span>
-                    <small class="text-muted">Auto-refreshes every 30s</small>
+                    <small class="text-muted">Refetches every 90s while this tab is visible</small>
                 </div>
                 <div class="px-3 pt-2 small text-muted">
                     Buchholz-style table from stored Lichess imports; official Swiss events live under
@@ -138,11 +138,18 @@
     </div>
 </div>
 {{ metrics|json_script:"dashboard-metrics-data" }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
 <script>
     const initialMetrics = JSON.parse(document.getElementById('dashboard-metrics-data').textContent);
     let eloChart;
     let radarChart;
+
+    /** Stops endless “replay” tweening whenever /dashboard/metrics polls. */
+    const staticChartOpts = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+    };
 
     function renderElo(data) {
         const labels = (data || []).map(p => p.x);
@@ -151,7 +158,7 @@
         if (eloChart) {
             eloChart.data.labels = labels;
             eloChart.data.datasets[0].data = values;
-            eloChart.update();
+            eloChart.update('none');
             return;
         }
         eloChart = new Chart(ctx, {
@@ -164,12 +171,11 @@
                     borderColor: '#1f5f99',
                     backgroundColor: 'rgba(31,95,153,0.15)',
                     fill: true,
-                    tension: 0.2
+                    tension: 0.15
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                ...staticChartOpts,
                 scales: {
                     x: {
                         ticks: { maxRotation: 45, minRotation: 30, autoSkip: true, maxTicksLimit: 12 },
@@ -184,7 +190,7 @@
         if (radarChart) {
             radarChart.data.labels = radarData.labels;
             radarChart.data.datasets[0].data = radarData.values;
-            radarChart.update();
+            radarChart.update('none');
             return;
         }
         radarChart = new Chart(ctx, {
@@ -199,10 +205,9 @@
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { r: { suggestedMin: 0, suggestedMax: 100 } }
-            }
+                ...staticChartOpts,
+                scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
+            },
         });
     }
 
@@ -236,6 +241,9 @@
     }
 
     async function refreshMetrics() {
+        if (document.visibilityState !== 'visible') {
+            return;
+        }
         try {
             const response = await fetch('{% url "club:dashboard_metrics" %}', {headers: {'X-Requested-With': 'XMLHttpRequest'}});
             if (!response.ok) return;
@@ -247,6 +255,13 @@
     }
 
     renderAll(initialMetrics);
-    setInterval(refreshMetrics, 30000);
+
+    let pollMs = 90000;
+    setInterval(refreshMetrics, pollMs);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            refreshMetrics();
+        }
+    });
 </script>
 {% endblock %}
