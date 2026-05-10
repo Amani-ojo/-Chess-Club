@@ -90,16 +90,12 @@ main {
     margin-top: 0.65rem;
 }
 
-/* Chart.js: fixed-size slot — avoid resize feedback loop elongating dashboard / sections */
+/* Chart.js: fixed-size slot — same height for Elo line + radar (avoid resize feedback loop) */
 .dashboard-chart-canvas {
     position: relative;
-    height: 260px;
+    height: 280px;
     width: 100%;
     overflow: hidden;
-}
-
-.dashboard-chart-canvas--radar {
-    height: 280px;
 }
 
 .dashboard-chart-canvas canvas {
