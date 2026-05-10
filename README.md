@@ -32,69 +32,58 @@ The project is built incrementally across the following phases. Each phase is a 
 
 > Branch: `feature/models`
 
-- [ ] Define `Member` model (linked to Django `User`, ELO rating, avatar, win/loss/draw stats)
-- [ ] Define `Match` model (white player, black player, status, result, venue, scheduled date)
-- [ ] Define `EloHistory` model (tracks rating changes per match)
-- [ ] Define `Announcement` model (title, body, published date, author)
-- [ ] Generate and apply migrations
-- [ ] Register models in the admin site (basic)
+- [x] Define `Member` model (linked to Django `User`, ELO rating, avatar, win/loss/draw stats)
+- [x] Define `Match` model (white player, black player, status, result, venue, scheduled date)
+- [x] Define `EloHistory` model (tracks rating changes per match)
+- [x] Define `Announcement` model (title, body, published date, author)
+- [x] Generate and apply migrations
+- [x] Register models in the admin site (basic)
 
 ### Phase 3 — ELO Rating Engine
 
 > Branch: `feature/elo-engine`
 
-- [ ] Implement `calculate_elo()` using the FIDE formula
-- [ ] Implement adaptive K-factor logic (K=40 new players, K=20 standard, K=10 elite)
-- [ ] Integrate ELO updates into match result saving (admin `save_model` override)
-- [ ] Create `EloHistory` records automatically on match completion
-- [ ] Add admin action to recalculate all ELO ratings from match history
+- [x] Implement expectation + adaptive K-factor (`club/elo_engine.py`)
+- [x] Integrate rating updates into match completion (`Match.save` + `club/services/match_elo.py`)
+- [x] Create `EloHistory` rows automatically when a completed match applies ELO
+- [x] Admin action + `python manage.py recalculate_club_elo` rebuild from history
 
 ### Phase 4 — Admin Panel Configuration
 
 > Branch: `feature/admin-panel`
 
-- [ ] Customize `MemberAdmin` (list display, filters, search)
-- [ ] Customize `MatchAdmin` (list display, filters, auto ELO on save)
-- [ ] Customize `EloHistoryAdmin` and `AnnouncementAdmin`
-- [ ] Test admin workflows (create member, schedule match, record result)
+- [x] Customize `MemberAdmin` (list display, search)
+- [x] Customize `MatchAdmin` (list display, filters, recalculate action)
+- [x] Customize `EloHistoryAdmin`, `AnnouncementAdmin`, and related registrations
+- [x] Optional staff TOTP enrolment (`django-otp`; see About page note)
 
 ### Phase 5 — Views & URL Routing
 
 > Branch: `feature/views`
 
-- [ ] Home page view (top 5 players, upcoming matches, announcements)
-- [ ] Leaderboard view (sortable by ELO or win percentage)
-- [ ] Matches view (tabbed: upcoming vs completed results)
-- [ ] Match detail view
-- [ ] Member profile view (stats, ELO history chart data, recent matches)
-- [ ] About page view with contact form
-- [ ] Wire up all URL routes in `club/urls.py`
-- [ ] Include club URLs in the project `urls.py`
+- [x] Home, leaderboard (DB-sorted win rate), matches, match detail
+- [x] Member profiles, about + contact
+- [x] `club/urls.py` + inclusion in project `urls.py`
 
 ### Phase 6 — Templates & Frontend
 
 > Branch: `feature/templates`
 
-- [ ] Create base template (`base.html`) with navbar, footer, Bootstrap 5
-- [ ] Home page template (hero section, player cards, match schedule, announcements)
-- [ ] Leaderboard template (ranking table with sort toggles)
-- [ ] Matches template (tabbed layout for upcoming/results)
-- [ ] Match detail template
-- [ ] Member profile template (stat cards, Chart.js ELO graph, match history table)
-- [ ] About page template (club info, contact form with crispy-forms)
-- [ ] Add custom CSS (`style.css`) and JavaScript (`app.js`)
-- [ ] Add `django-crispy-forms` and `crispy-bootstrap5` to requirements and settings
+- [x] Base layout (`base.html`), home, leaderboard, matches, member pages, crispy forms where needed
+- [x] `static/css/style.css`, `static/js/app.js`; dashboard retains Chart.js for pipeline metrics
 
 ### Phase 7 — Sample Data & Polish
 
 > Branch: `feature/sample-data`
 
-- [ ] Write `create_sample_data.py` script (members, matches, ELO history, announcements)
-- [ ] Add fixture files for reproducible data loading
-- [ ] Configure `WhiteNoise` for static file serving
-- [ ] Add `python-decouple` for environment variable management
-- [ ] Final testing of all pages and workflows
-- [ ] Update README with full installation and usage instructions
+- [x] `python manage.py create_sample_data`
+- [x] Optional `fixtures/` omitted in favour of the management command
+- [x] WhiteNoise static storage, `python-decouple`, `.env.example`
+- [x] Operational README updates (deployment QA remains environment-specific)
+
+### Security hygiene
+
+Never commit `.env`, API tokens, or ad-hoc key files (`lichess_*`, etc.). For `DEBUG=False`, set a production `SECRET_KEY` and populate `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS`.
 
 ## Git Workflow
 
@@ -142,17 +131,20 @@ Each feature branch is created from `develop`, worked on, and merged back into `
    pip install -r requirements.txt
    ```
 
-4. **Apply database migrations**
+4. **Configure environment (recommended)**  
+   Copy `.env.example` to `.env` and set `SECRET_KEY` plus any Postgres or pipeline variables you need.
+
+5. **Apply database migrations**
    ```bash
    python manage.py migrate
    ```
 
-5. **Run the development server**
+6. **Run the development server**
    ```bash
    python manage.py runserver
    ```
 
-6. Open your browser and visit `http://127.0.0.1:8000/`
+7. Open your browser and visit `http://127.0.0.1:8000/`
 
 ## AI Pipeline Integration
 

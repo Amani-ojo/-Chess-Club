@@ -15,6 +15,10 @@ db.sqlite3
 staticfiles/
 media/avatars/
 
+# Never commit secrets or local credential drop files
+lichess_API
+*.pem
+
 # IDE
 .vscode/
 .idea/

@@ -1,0 +1,13 @@
+/* Thin layer on theme.css — layout polish for club pages */
+
+main {
+    min-height: 60vh;
+}
+
+.hero-muted {
+    background: linear-gradient(135deg, rgba(33, 37, 41, 0.92), rgba(13, 110, 253, 0.35));
+}
+
+.table-rank-col {
+    width: 4rem;
+}
