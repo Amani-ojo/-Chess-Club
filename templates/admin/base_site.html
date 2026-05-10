@@ -1,6 +1,9 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
+{# Skip admin/dark_mode.css + theme.js so OS "dark mode" does not force low-contrast admin UI. #}
+{% block dark-mode-vars %}{% endblock %}
+
 {% block extrastyle %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
