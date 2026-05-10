@@ -23,6 +23,9 @@ fi
 
 mkdir -p .logs
 
+echo "==> Applying database migrations"
+python manage.py migrate --noinput
+
 echo "==> Ensuring Redis is running"
 sudo service redis-server start >/dev/null
 
