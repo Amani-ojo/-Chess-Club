@@ -89,3 +89,20 @@ main {
 .club-history .timeline-markers li + li {
     margin-top: 0.65rem;
 }
+
+/* Chart.js: fixed-size slot — avoid resize feedback loop elongating dashboard / sections */
+.dashboard-chart-canvas {
+    position: relative;
+    height: 260px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.dashboard-chart-canvas--radar {
+    height: 280px;
+}
+
+.dashboard-chart-canvas canvas {
+    display: block;
+    max-height: 100%;
+}

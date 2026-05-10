@@ -78,7 +78,7 @@
                         Synthetic path from imports in chronological order (each player starts from their stored club OTB when first seen).
                         Updates do not overwrite your leaderboard OTB rating.
                     </p>
-                    <canvas id="eloProgressChart" height="220"></canvas>
+                    <div class="dashboard-chart-canvas" aria-hidden="true"><canvas id="eloProgressChart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -87,7 +87,7 @@
                 <div class="card-header bg-white fw-semibold">Skill radar (Stockfish)</div>
                 <div class="card-body">
                     <p class="small text-muted mb-2">Opening / middle / endgame CPL heuristics from completed analyses.</p>
-                    <canvas id="skillRadarChart" height="220"></canvas>
+                    <div class="dashboard-chart-canvas dashboard-chart-canvas--radar" aria-hidden="true"><canvas id="skillRadarChart"></canvas></div>
                 </div>
             </div>
         </div>
