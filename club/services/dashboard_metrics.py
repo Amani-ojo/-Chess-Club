@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.db.models import Q
+from django.utils import timezone
 
 from ai_pipeline.models import Game, GameAnalysis, MoveEvaluation
 
@@ -20,24 +21,46 @@ def member_games_for_player(member):
 
 
 def build_elo_history_for_member(member):
-    """Infer a display-only Elo trace from imported online games (not club OTB `Member.elo_rating`)."""
-    all_games = Game.objects.select_related('player_white', 'player_black').order_by('played_at', 'id')
-    ratings: dict[int, float] = {}
+    """
+    Display-only Elo trace from *this member's* imported games in chronological order.
+
+    Previous implementation replayed every `Game` in the database and used date-only x labels,
+    which (a) skewed the curve for sparse players and (b) broke Chart.js category axes when
+    several games shared the same calendar day.
+    """
+    if not member:
+        return []
+
+    games = (
+        Game.objects.filter(Q(player_white=member) | Q(player_black=member))
+        .select_related('player_white', 'player_black')
+        .order_by('played_at', 'id')
+    )
+
+    start = 1500.0
+    ratings: dict[int, float] = {member.id: start}
     history: list[dict] = []
     k_factor = 20
 
-    for game in all_games:
+    def rating_for(mid: int) -> float:
+        return ratings.setdefault(mid, start)
+
+    for game in games:
         white_id = game.player_white_id
         black_id = game.player_black_id
-        white_rating = ratings.get(white_id, 1200.0)
-        black_rating = ratings.get(black_id, 1200.0)
+        if white_id == black_id:
+            continue
+
+        white_rating = rating_for(white_id)
+        black_rating = rating_for(black_id)
 
         expected_white = 1.0 / (1.0 + (10 ** ((black_rating - white_rating) / 400.0)))
         expected_black = 1.0 - expected_white
 
-        if game.result == '1-0':
+        res = (game.result or '').strip()
+        if res == '1-0':
             score_white, score_black = 1.0, 0.0
-        elif game.result == '0-1':
+        elif res == '0-1':
             score_white, score_black = 0.0, 1.0
         else:
             score_white, score_black = 0.5, 0.5
@@ -47,13 +70,13 @@ def build_elo_history_for_member(member):
         ratings[white_id] = white_new
         ratings[black_id] = black_new
 
-        if member and (game.player_white_id == member.id or game.player_black_id == member.id):
-            history.append(
-                {
-                    'x': game.played_at.strftime('%Y-%m-%d'),
-                    'y': round(ratings[member.id], 2),
-                }
-            )
+        label = timezone.localtime(game.played_at).strftime('%Y-%m-%d %H:%M')
+        history.append(
+            {
+                'x': f'{label} · g{game.pk}',
+                'y': round(ratings[member.id], 2),
+            }
+        )
     return history
 
 

@@ -167,7 +167,15 @@
                     tension: 0.2
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { maxRotation: 45, minRotation: 30, autoSkip: true, maxTicksLimit: 12 },
+                    },
+                },
+            },
         });
     }
 
