@@ -14,12 +14,12 @@ def members_for_leaderboard(sort: str):
         return qs.order_by('-elo_rating', '-wins')
 
     return (
-        qs.annotate(_played=F('wins') + F('losses') + F('draws'))
+        qs.annotate(lb_played=F('wins') + F('losses') + F('draws'))
         .annotate(
-            _win_pct=Case(
-                When(_played=0, then=Value(0.0)),
-                default=ExpressionWrapper(F('wins') * 100.0 / F('_played'), output_field=FloatField()),
+            win_pct=Case(
+                When(lb_played=0, then=Value(0.0)),
+                default=ExpressionWrapper(F('wins') * 100.0 / F('lb_played'), output_field=FloatField()),
             ),
         )
-        .order_by('-_win_pct', '-elo_rating', '-wins')
+        .order_by('-win_pct', '-elo_rating', '-wins')
     )

@@ -37,7 +37,7 @@
                     <td>{{ m.losses }}</td>
                     <td>
                         {% if sort == 'winpct' %}
-                            {{ m._win_pct|floatformat:2 }}
+                            {{ m.win_pct|floatformat:2 }}
                         {% else %}
                             {{ m.win_percentage }}
                         {% endif %}%
