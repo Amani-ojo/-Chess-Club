@@ -69,25 +69,29 @@
         </div>
     </div>
 
-    <div class="row g-4 mt-1">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
+    <div class="row g-4 mt-1 align-items-stretch">
+        <div class="col-lg-6 d-flex">
+            <div class="card border-0 shadow-sm w-100 d-flex flex-column">
                 <div class="card-header bg-white fw-semibold">Elo curve (imported online games)</div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">
-                        Synthetic path from imports in chronological order (each player starts from their stored club OTB when first seen).
-                        Updates do not overwrite your leaderboard OTB rating.
-                    </p>
-                    <div class="dashboard-chart-canvas" aria-hidden="true"><canvas id="eloProgressChart"></canvas></div>
+                <div class="card-body d-flex flex-column flex-grow-1 pt-3">
+                    <div class="dashboard-pair-intro small text-muted mb-2 flex-shrink-0">
+                        <p class="mb-0">
+                            Synthetic path from imports in chronological order (each player starts from their stored club OTB when first seen).
+                            Updates do not overwrite your leaderboard OTB rating.
+                        </p>
+                    </div>
+                    <div class="dashboard-chart-canvas flex-grow-1 flex-shrink-0" aria-hidden="true"><canvas id="eloProgressChart"></canvas></div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
+        <div class="col-lg-6 d-flex">
+            <div class="card border-0 shadow-sm w-100 d-flex flex-column">
                 <div class="card-header bg-white fw-semibold">Skill radar (Stockfish)</div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Opening / middle / endgame CPL heuristics from completed analyses.</p>
-                    <div class="dashboard-chart-canvas" aria-hidden="true"><canvas id="skillRadarChart"></canvas></div>
+                <div class="card-body d-flex flex-column flex-grow-1 pt-3">
+                    <div class="dashboard-pair-intro small text-muted mb-2 flex-shrink-0">
+                        <p class="mb-0">Opening / middle / endgame CPL heuristics from completed analyses.</p>
+                    </div>
+                    <div class="dashboard-chart-canvas flex-grow-1 flex-shrink-0" aria-hidden="true"><canvas id="skillRadarChart"></canvas></div>
                 </div>
             </div>
         </div>

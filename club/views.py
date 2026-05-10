@@ -14,7 +14,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 import django_otp
-from django_otp import user_has_device
 from django_otp.plugins.otp_totp.models import TOTPDevice
 import qrcode
 
@@ -33,7 +32,7 @@ from .models import (
     TeamMembership,
     UserProfile,
 )
-from .otp_gate import otp_session_redirect_if_needed, resolve_safe_next
+from .otp_gate import otp_session_redirect_if_needed, otp_verified_safe, resolve_safe_next
 from .queries import members_for_leaderboard
 from .services.dashboard_metrics import build_dashboard_metrics, member_games_for_player
 from .services.swiss_pairing import tournament_standings_rows
@@ -45,7 +44,7 @@ class ClubLoginView(LoginView):
 
     def get_success_url(self):
         user = self.request.user
-        if getattr(user, 'is_authenticated', False) and user_has_device(user) and not user.is_verified():
+        if getattr(user, 'is_authenticated', False) and not otp_verified_safe(user):
             cand = self.request.POST.get(self.redirect_field_name) or self.request.GET.get(self.redirect_field_name)
             fb = reverse('club:dashboard')
             safe = resolve_safe_next(self.request, cand if cand else fb)
@@ -66,7 +65,7 @@ def otp_verify_view(request):
     devices = list(TOTPDevice.objects.filter(user=request.user, confirmed=True))
     if not devices:
         return redirect(reverse('club:dashboard'))
-    if request.user.is_verified():
+    if otp_verified_safe(request.user):
         return redirect(resolve_safe_next(request, request.GET.get('next')))
 
     next_path = resolve_safe_next(request, request.GET.get('next'))

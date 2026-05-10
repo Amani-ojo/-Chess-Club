@@ -90,10 +90,17 @@ main {
     margin-top: 0.65rem;
 }
 
-/* Chart.js: fixed-size slot — same height for Elo line + radar (avoid resize feedback loop) */
+/* Matched heights for “Elo curve” vs “Skill radar” cards despite different blurb length */
+.dashboard-pair-intro {
+    /* Reserve space for multi-line Elo blurb so both chart slots align */
+    min-height: 5.25rem;
+}
+
+/* Chart.js slot: min height + flex fill inside stretched cards */
 .dashboard-chart-canvas {
     position: relative;
-    height: 280px;
+    flex: 1 1 280px;
+    min-height: 280px;
     width: 100%;
     overflow: hidden;
 }

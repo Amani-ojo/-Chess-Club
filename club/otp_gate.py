@@ -11,6 +11,26 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django_otp import user_has_device
 
 
+def otp_verified_safe(user) -> bool:
+    """
+    True when TOTP challenge is unnecessary (no device) or django-otp considers the session verified.
+
+    Django's plain User gains ``is_verified`` only once OTP middleware / login flow has patched it.
+    Calling ``user.is_verified()`` directly from LoginView.get_success_url can raise AttributeError.
+    """
+    if not getattr(user, 'is_authenticated', False):
+        return False
+    if not user_has_device(user):
+        return True
+    checker = getattr(user, 'is_verified', None)
+    if not callable(checker):
+        return False
+    try:
+        return bool(checker())
+    except Exception:
+        return False
+
+
 def _fallback_next(request) -> str:
     target = getattr(settings, 'LOGIN_REDIRECT_URL', '') or ''
     try:
@@ -31,7 +51,7 @@ def otp_session_redirect_if_needed(request):
         return None
     if not user_has_device(user):
         return None
-    if user.is_verified():
+    if otp_verified_safe(user):
         return None
 
     raw = request.get_full_path()[:2048]
