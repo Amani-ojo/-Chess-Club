@@ -27,6 +27,9 @@
                         <button type="submit" name="action" value="import_games" class="btn btn-outline-success">Import Recent Games</button>
                     </form>
                     <p class="small text-muted mt-3 mb-0">API token is stored in your Django profile and used by backend jobs to call Lichess.</p>
+                    <p class="small mt-3 mb-0">
+                        <a href="{% url 'club:totp_manage' %}">Optional member authenticator (TOTP)</a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -69,16 +72,18 @@
     <div class="row g-4 mt-1">
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white fw-semibold">Elo Progress</div>
+                <div class="card-header bg-white fw-semibold">Elo curve (imported online games)</div>
                 <div class="card-body">
+                    <p class="small text-muted mb-2">Synthetic rating path from Lichess imports only — not the club OTB ELO on your public profile.</p>
                     <canvas id="eloProgressChart" height="220"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white fw-semibold">Skill Radar</div>
+                <div class="card-header bg-white fw-semibold">Skill radar (Stockfish)</div>
                 <div class="card-body">
+                    <p class="small text-muted mb-2">Opening / middle / endgame CPL heuristics from completed analyses.</p>
                     <canvas id="skillRadarChart" height="220"></canvas>
                 </div>
             </div>
@@ -89,11 +94,12 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                    <span>Tournament Standings</span>
+                    <span>Imported online · standings</span>
                     <small class="text-muted">Auto-refreshes every 30s</small>
                 </div>
                 <div class="px-3 pt-2 small text-muted">
-                    W = Wins, D = Draws, L = Losses.
+                    Buchholz-style table from stored Lichess imports; official Swiss events live under
+                    <a href="{% url 'club:tournament_list' %}">Tournaments</a>. W / D / L as usual.
                 </div>
                 <div class="table-responsive">
                     <table class="table mb-0" id="standingsTable">
@@ -153,7 +159,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Elo',
+                    label: 'Online (imports)',
                     data: values,
                     borderColor: '#1f5f99',
                     backgroundColor: 'rgba(31,95,153,0.15)',

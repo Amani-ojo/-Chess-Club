@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django_otp.admin import OTPAdminAuthenticationForm
 
 from .models import (
@@ -8,11 +9,16 @@ from .models import (
     EloHistory,
     Match,
     Member,
+    SwissPairing,
+    SwissParticipant,
+    SwissRound,
+    SwissTournament,
     Team,
     TeamMembership,
     UserProfile,
 )
 from .services.match_elo import recalculate_all_club_elo
+from .services.swiss_pairing import generate_next_swiss_round
 
 admin.site.site_header = 'Eschen Chess Club Control Center'
 admin.site.site_title = 'Eschen Chess Club Admin'
@@ -50,6 +56,52 @@ class UserProfileAdmin(admin.ModelAdmin):
     autocomplete_fields = ['user']
 
 
+class SwissParticipantInline(admin.TabularInline):
+    model = SwissParticipant
+    extra = 1
+    autocomplete_fields = ('member',)
+
+
+class SwissPairingInline(admin.TabularInline):
+    model = SwissPairing
+    extra = 0
+    autocomplete_fields = ('white', 'black')
+    readonly_fields = ('club_match',)
+
+
+@admin.register(SwissTournament)
+class SwissTournamentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'status', 'rounds_played', 'rounds_target', 'counts_for_club_elo', 'created_at')
+    list_filter = ('status', 'counts_for_club_elo')
+    search_fields = ('name', 'slug', 'venue')
+    readonly_fields = ('slug', 'rounds_played', 'created_at', 'updated_at')
+    inlines = [SwissParticipantInline]
+    actions = ('generate_next_round', 'mark_finished')
+
+    @admin.action(description='Generate next Swiss round pairings')
+    def generate_next_round(self, request, queryset):
+        for t in queryset:
+            rnd = generate_next_swiss_round(t)
+            if rnd:
+                self.message_user(request, f'Created round {rnd.number} for {t}.', messages.SUCCESS)
+            else:
+                self.message_user(request, f'Could not advance {t}: check players, limits, duplicates.', messages.WARNING)
+
+    @admin.action(description='Mark tournament as finished')
+    def mark_finished(self, request, queryset):
+        n = queryset.update(status=SwissTournament.STATUS_DONE)
+        self.message_user(request, f'Marked {n} tournament(s) finished.', messages.SUCCESS)
+
+
+@admin.register(SwissRound)
+class SwissRoundAdmin(admin.ModelAdmin):
+    list_display = ('tournament', 'number', 'created_at')
+    list_filter = ('tournament',)
+    ordering = ('-tournament_id', '-number')
+    inlines = [SwissPairingInline]
+    autocomplete_fields = ('tournament',)
+
+
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
     list_display = (
@@ -68,8 +120,17 @@ class MatchAdmin(admin.ModelAdmin):
         'venue',
     )
     autocomplete_fields = ['white_player', 'black_player']
-    readonly_fields = ('elo_processed',)
+    readonly_fields = ('elo_processed', 'swiss_pairing_display')
     actions = ['action_recalculate_club_elo']
+
+    @admin.display(description='Swiss pairing')
+    def swiss_pairing_display(self, obj):
+        if not obj.pk:
+            return ''
+        try:
+            return str(obj.swiss_pairing.round)
+        except ObjectDoesNotExist:
+            return ''
 
     @admin.action(description='Recalculate club ELO from all completed matches')
     def action_recalculate_club_elo(self, request, queryset):

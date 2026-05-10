@@ -184,6 +184,113 @@ class TeamMembership(models.Model):
         unique_together = [('team', 'member')]
 
 
+class SwissTournament(models.Model):
+    STATUS_DRAFT = 'draft'
+    STATUS_ACTIVE = 'active'
+    STATUS_DONE = 'done'
+    STATUS_CHOICES = [
+        (STATUS_DRAFT, 'Draft'),
+        (STATUS_ACTIVE, 'Active'),
+        (STATUS_DONE, 'Finished'),
+    ]
+
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT)
+    rounds_played = models.PositiveSmallIntegerField(default=0)
+    rounds_target = models.PositiveSmallIntegerField(
+        default=5,
+        help_text='Maximum Swiss rounds (organisers usually set near ceil(log2(n))).',
+    )
+    venue = models.CharField(max_length=200, blank=True)
+    counts_for_club_elo = models.BooleanField(
+        default=True,
+        help_text='When results are recorded, create/update OTB Match rows so club ELO updates.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(self.name)[:200] or 'tournament'
+            slug = base
+            n = 2
+            while True:
+                qs = SwissTournament.objects.filter(slug=slug)
+                if self.pk:
+                    qs = qs.exclude(pk=self.pk)
+                if not qs.exists():
+                    break
+                suffix = f'-{n}'
+                slug = f'{base[: 220 - len(suffix)]}{suffix}'
+                n += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+
+class SwissParticipant(models.Model):
+    tournament = models.ForeignKey(SwissTournament, on_delete=models.CASCADE, related_name='participants')
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='swiss_entries')
+
+    class Meta:
+        unique_together = [('tournament', 'member')]
+
+    def __str__(self):
+        return f'{self.member} → {self.tournament.name}'
+
+
+class SwissRound(models.Model):
+    tournament = models.ForeignKey(SwissTournament, on_delete=models.CASCADE, related_name='rounds')
+    number = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['number']
+        unique_together = [('tournament', 'number')]
+
+    def __str__(self):
+        return f'{self.tournament.name} · Round {self.number}'
+
+
+class SwissPairing(models.Model):
+    RESULT_CHOICES = Match.RESULT_CHOICES
+
+    round = models.ForeignKey(SwissRound, on_delete=models.CASCADE, related_name='pairings')
+    board = models.PositiveSmallIntegerField(default=1)
+    white = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='swiss_pairings_white')
+    black = models.ForeignKey(Member, null=True, blank=True, on_delete=models.CASCADE, related_name='swiss_pairings_black')
+    result = models.CharField(max_length=10, blank=True, choices=RESULT_CHOICES)
+    club_match = models.OneToOneField(
+        'Match',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='swiss_pairing',
+        help_text='Linked OTB club match when this pairing counts for official ELO.',
+    )
+
+    class Meta:
+        ordering = ['board']
+        unique_together = [('round', 'board')]
+
+    def __str__(self):
+        if self.black_id:
+            return f'Bd{self.board}: {self.white} vs {self.black}'
+        return f'Bd{self.board}: {self.white} (bye)'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        from club.services.swiss_otb_bridge import upsert_match_for_pairing
+
+        upsert_match_for_pairing(self)
+
+
 class UserProfile(models.Model):
     THEME_CHOICES = [
         ('classic', 'Classic Light'),

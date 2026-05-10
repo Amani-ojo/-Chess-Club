@@ -31,6 +31,11 @@ nohup celery -A chess_club worker -l info > .logs/celery.log 2>&1 &
 CELERY_PID=$!
 echo "$CELERY_PID" > .logs/celery.pid
 
+echo "==> Starting Celery Beat (scheduled Lichess sync, background)"
+nohup celery -A chess_club beat -l info > .logs/celery_beat.log 2>&1 &
+CELERY_BEAT_PID=$!
+echo "$CELERY_BEAT_PID" > .logs/celery_beat.pid
+
 cleanup() {
   if [[ -f .logs/celery.pid ]]; then
     PID="$(cat .logs/celery.pid)"
@@ -39,6 +44,14 @@ cleanup() {
       kill "$PID" >/dev/null 2>&1 || true
     fi
     rm -f .logs/celery.pid
+  fi
+  if [[ -f .logs/celery_beat.pid ]]; then
+    BPID="$(cat .logs/celery_beat.pid)"
+    if ps -p "$BPID" >/dev/null 2>&1; then
+      echo "==> Stopping Celery Beat ($BPID)"
+      kill "$BPID" >/dev/null 2>&1 || true
+    fi
+    rm -f .logs/celery_beat.pid
   fi
 }
 

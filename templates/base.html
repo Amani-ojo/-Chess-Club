@@ -23,6 +23,7 @@
                 <a class="nav-link" href="{% url 'club:leaderboard' %}">Leaderboard</a>
                 <a class="nav-link" href="{% url 'club:matches' %}">Matches</a>
                 <a class="nav-link" href="{% url 'club:teams_list' %}">Teams</a>
+                <a class="nav-link" href="{% url 'club:tournament_list' %}">Tournaments</a>
                 <a class="nav-link" href="{% url 'club:about' %}">About</a>
                 {% if user.is_authenticated %}
                     <a class="nav-link" href="{% url 'club:dashboard' %}">Dashboard</a>

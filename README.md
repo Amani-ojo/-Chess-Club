@@ -150,10 +150,20 @@ Each feature branch is created from `develop`, worked on, and merged back into `
 
 The project now includes a full AI analysis pipeline integrated into the same Django app:
 
-- Lichess import tasks
+- Lichess import tasks (plus **scheduled** fan-out via Celery Beat when configured)
 - Stockfish game analysis
 - Move-by-move evaluations
 - Player insight generation
+
+### Course proposal alignment
+
+This codebase is intentionally shaped to satisfy the ChessMate commitments to supervisors (beyond basic CRUD):
+
+- **Distributed queue:** Celery + Redis for analysis and imports; Django views stay non-blocking relative to Stockfish CPU work.
+- **Swiss tournaments:** Django models (`SwissTournament` → `SwissRound` → `SwissPairing`), admin tooling to enrol members and advance rounds using a paired-top-vs-bottom-half engine with greedy repeat repair, bye handling, and Buchholz-style standings on the public **`/tournaments/`** views. When **counts for club ELO** is enabled, completed boards create OTB **`Match`** rows so the club ELO engine stays authoritative.
+- **Two paths for ELO:** Official **OTB club ELO** comes from **`Match`** + **`EloHistory`**. Dashboard **“online” Elo curves** remain a **presentation trace** inferred from imports so Dr.-letter language can distinguish diagnostic analytics from sanctioned ratings.
+- **Member TOTP (optional):** Authenticator enrolment lives at **`/account/totp/`**; **`/admin/`** continues to use `django-otp` staff MFA — separate flows.
+- **Scheduled Lichess pulls:** Celery Beat task `periodic_fetch_linked_lichess_games` (interval from `LICHESS_BEAT_SCHEDULE_SECONDS`, disable with `DISABLE_LICHESS_BEAT`), enqueuing imports for profiles with linked usernames.
 
 ### Environment Variables (optional but recommended)
 
@@ -162,6 +172,7 @@ Set these before running:
 - `LICHESS_API_TOKEN` for authenticated Lichess API usage
 - `STOCKFISH_PATH` to your local Stockfish executable (defaults to the bundled binary path)
 - `CELERY_BROKER_URL` (default `redis://localhost:6379/0`)
+- `LICHESS_BEAT_SCHEDULE_SECONDS` (default `3600`; set `0` or export `DISABLE_LICHESS_BEAT=1` to skip registering the beat schedule in `chess_club/celery.py`)
 
 ### Running Locally with Pipeline
 
@@ -171,8 +182,10 @@ Set these before running:
    - `python manage.py runserver`
 3. In another terminal, run Celery worker:
    - `celery -A chess_club worker -l info`
+4. For scheduled Lichess sync, run Beat in addition to the worker:
+   - `celery -A chess_club beat -l info`
 
-Use `/admin/` to add members and games, then trigger task functions from the shell or admin workflows.
+Use `/admin/` to add members and games, then trigger task functions from the shell or admin workflows (including Swiss tournament round generation).
 
 ### Codespaces Bootstrap (One Command)
 
@@ -190,7 +203,7 @@ chmod +x start_all_services.sh
 ./start_all_services.sh
 ```
 
-This starts Redis, launches Celery in the background (logs in `.logs/celery.log`), and runs Django in the foreground.
+This starts Redis, launches Celery worker and Celery Beat in the background (`celery.log` / `celery_beat.log`), and runs Django in the foreground.
 
 Then start services in separate terminals:
 

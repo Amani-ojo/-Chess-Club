@@ -20,7 +20,7 @@ def member_games_for_player(member):
 
 
 def build_elo_history_for_member(member):
-    """Infer Elo trace from imported online games using a fixed league K-factor (presentation only)."""
+    """Infer a display-only Elo trace from imported online games (not club OTB `Member.elo_rating`)."""
     all_games = Game.objects.select_related('player_white', 'player_black').order_by('played_at', 'id')
     ratings: dict[int, float] = {}
     history: list[dict] = []

@@ -1,12 +1,22 @@
+import base64
+import io
 from datetime import timedelta
+from urllib.parse import quote
 
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.db.models import Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_http_methods
+import django_otp
+from django_otp import user_has_device
+from django_otp.plugins.otp_totp.models import TOTPDevice
+import qrcode
 
 from ai_pipeline.models import Game
 from ai_pipeline.tasks import fetch_lichess_games_task
@@ -14,9 +24,130 @@ from ai_pipeline.tasks import fetch_lichess_games_task
 from .constants import CLUB_PRIMARY_VENUE
 from .forms import ContactForm, MemberProfileForm, RegisterForm, UserProfileForm
 from .member_utils import sync_member_with_user
-from .models import Announcement, Match, Member, Team, TeamMembership, UserProfile
+from .models import (
+    Announcement,
+    Match,
+    Member,
+    SwissTournament,
+    Team,
+    TeamMembership,
+    UserProfile,
+)
+from .otp_gate import otp_session_redirect_if_needed, resolve_safe_next
 from .queries import members_for_leaderboard
 from .services.dashboard_metrics import build_dashboard_metrics, member_games_for_player
+from .services.swiss_pairing import tournament_standings_rows
+
+
+class ClubLoginView(LoginView):
+    template_name = 'registration/login.html'
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        user = self.request.user
+        if getattr(user, 'is_authenticated', False) and user_has_device(user) and not user.is_verified():
+            cand = self.request.POST.get(self.redirect_field_name) or self.request.GET.get(self.redirect_field_name)
+            fb = reverse('club:dashboard')
+            safe = resolve_safe_next(self.request, cand if cand else fb)
+            return reverse('club:otp_verify') + '?next=' + quote(safe, safe='/')
+        return super().get_success_url()
+
+
+def _otp_qr_data_uri(config_url: str) -> str:
+    img = qrcode.make(config_url)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def otp_verify_view(request):
+    devices = list(TOTPDevice.objects.filter(user=request.user, confirmed=True))
+    if not devices:
+        return redirect(reverse('club:dashboard'))
+    if request.user.is_verified():
+        return redirect(resolve_safe_next(request, request.GET.get('next')))
+
+    next_path = resolve_safe_next(request, request.GET.get('next'))
+
+    if request.method == 'POST':
+        token = request.POST.get('otp_token', '').replace(' ', '')
+        for device in devices:
+            if device.verify_token(token):
+                django_otp.login(request, device)
+                raw = request.POST.get('next') or ''
+                return redirect(resolve_safe_next(request, raw if raw else next_path))
+        messages.error(request, 'Invalid authenticator code.')
+
+    return render(
+        request,
+        'registration/otp_verify.html',
+        {'next_path': next_path},
+    )
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def totp_manage_view(request):
+    if request.method == 'POST':
+        confirmed = TOTPDevice.objects.filter(user=request.user, confirmed=True).first()
+        pending = TOTPDevice.objects.filter(user=request.user, confirmed=False).first()
+        if 'disable' in request.POST and confirmed:
+            TOTPDevice.objects.filter(user=request.user).delete()
+            messages.success(request, 'Two-factor authentication is now off for your account.')
+            return redirect('club:dashboard')
+        if 'start' in request.POST and not confirmed and not pending:
+            TOTPDevice.objects.create(user=request.user, name='default')
+            return redirect('club:totp_manage')
+        if 'confirm' in request.POST and pending:
+            tok = request.POST.get('otp_token', '').replace(' ', '')
+            if pending.verify_token(tok):
+                pending.confirmed = True
+                pending.save()
+                django_otp.login(request, pending)
+                messages.success(request, 'Authenticator enabled.')
+                return redirect('club:dashboard')
+            messages.error(request, 'Code did not match. Try scanning the QR again.')
+
+    pending = TOTPDevice.objects.filter(user=request.user, confirmed=False).first()
+    confirmed = TOTPDevice.objects.filter(user=request.user, confirmed=True).first()
+    qr_data_uri = None
+    config_url = None
+    if pending:
+        config_url = pending.config_url
+        qr_data_uri = _otp_qr_data_uri(config_url)
+
+    return render(
+        request,
+        'club/totp_manage.html',
+        {
+            'confirmed_device': confirmed,
+            'pending_device': pending,
+            'config_url': config_url,
+            'qr_data_uri': qr_data_uri,
+        },
+    )
+
+
+def tournament_list_view(request):
+    qs = SwissTournament.objects.all()
+    return render(request, 'club/tournament_list.html', {'tournaments': qs})
+
+
+def tournament_detail_view(request, slug):
+    tournament = get_object_or_404(SwissTournament, slug=slug)
+    rounds = tournament.rounds.prefetch_related('pairings__white', 'pairings__black').all()
+    standings = tournament_standings_rows(tournament)
+    return render(
+        request,
+        'club/tournament_detail.html',
+        {
+            'tournament': tournament,
+            'rounds': rounds,
+            'standings': standings,
+        },
+    )
 
 
 def home(request):
@@ -72,6 +203,9 @@ def member_detail(request, member_id):
 
 @login_required
 def member_profile_edit_view(request, member_id):
+    redir = otp_session_redirect_if_needed(request)
+    if redir:
+        return redir
     member = get_object_or_404(Member, pk=member_id)
     if member.user_id != request.user.id:
         messages.error(request, 'You can only edit your own profile.')
@@ -156,6 +290,9 @@ def register_view(request):
             UserProfile.objects.get_or_create(user=user)
             sync_member_with_user(user, '')
             login(request, user)
+            gate = otp_session_redirect_if_needed(request)
+            if gate:
+                return gate
             return redirect('club:dashboard')
     else:
         form = RegisterForm()
@@ -164,6 +301,9 @@ def register_view(request):
 
 @login_required
 def dashboard_view(request):
+    redir = otp_session_redirect_if_needed(request)
+    if redir:
+        return redir
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     form = UserProfileForm(request.POST or None, instance=profile)
     auto_sync_queued = False
@@ -219,5 +359,10 @@ def dashboard_view(request):
 
 @login_required
 def dashboard_metrics_api(request):
+    redir = otp_session_redirect_if_needed(request)
+    if redir:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'detail': 'authenticator_challenge_required'}, status=401)
+        return redir
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     return JsonResponse(build_dashboard_metrics(request.user, profile))

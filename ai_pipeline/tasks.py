@@ -142,6 +142,30 @@ def fetch_lichess_games_task(self, lichess_username, member_id, api_token=''):
             analyse_game_task.delay(game.pk)
 
 
+@shared_task
+def periodic_fetch_linked_lichess_games():
+    """
+    Enqueue imports for members who linked a username (intended for Celery Beat hourly schedule).
+    """
+    from django.db.models import Q
+
+    from club.member_utils import sync_member_with_user
+    from club.models import UserProfile
+
+    qs = UserProfile.objects.filter(
+        Q(lichess_username__isnull=False) & ~Q(lichess_username=''),
+    ).select_related('user')
+
+    count = 0
+    for profile in qs.iterator():
+        if not profile.user_id:
+            continue
+        member = sync_member_with_user(profile.user, profile.lichess_username)
+        fetch_lichess_games_task.delay(profile.lichess_username, member.pk, profile.lichess_api_key or '')
+        count += 1
+    return count
+
+
 @shared_task(bind=True, max_retries=2, default_retry_delay=30)
 def generate_insights_task(self, member_id):
     try:
