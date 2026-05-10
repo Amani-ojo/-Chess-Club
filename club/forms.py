@@ -17,11 +17,10 @@ class RegisterForm(UserCreationForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ('lichess_username', 'lichess_api_key', 'theme_preference')
+        fields = ('lichess_username', 'lichess_api_key')
         widgets = {
             'lichess_api_key': forms.PasswordInput(render_value=True, attrs={'placeholder': 'Paste your Lichess API token'}),
             'lichess_username': forms.TextInput(attrs={'placeholder': 'your_lichess_username'}),
-            'theme_preference': forms.Select(attrs={'class': 'form-select'}),
         }
 
 

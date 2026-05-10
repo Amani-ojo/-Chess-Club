@@ -1,5 +1,3 @@
 def user_theme(request):
-    theme = 'classic'
-    if request.user.is_authenticated and hasattr(request.user, 'profile'):
-        theme = request.user.profile.theme_preference
-    return {'ui_theme': theme}
+    """Club UI uses one palette site-wide (see static/css/theme.css)."""
+    return {'ui_theme': 'classic'}

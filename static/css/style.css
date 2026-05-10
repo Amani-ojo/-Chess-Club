@@ -5,7 +5,7 @@ main {
 }
 
 .hero-muted {
-    background: linear-gradient(135deg, rgba(33, 37, 41, 0.92), rgba(13, 110, 253, 0.35));
+    background: var(--eschen-hero-gradient);
 }
 
 .table-rank-col {
@@ -79,12 +79,6 @@ main {
 
 .member-profile-head .member-avatar-img {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-}
-
-.theme-midnight .member-avatar-placeholder,
-.theme-forest .member-avatar-placeholder,
-.theme-royal .member-avatar-placeholder {
-    filter: brightness(1.05);
 }
 
 .club-history .timeline-markers {

@@ -1,43 +1,41 @@
-body.theme-classic {
-    background: #f8f9fa;
-    color: #1d2430;
-}
+@import url('brand.css');
 
-body.theme-classic .card {
-    background: #fff;
-}
-
-body.theme-midnight {
-    background: #0f1220;
-    color: #dbe5ff;
-}
-
-body.theme-midnight .card,
-body.theme-midnight .card-header {
-    background: #1a2033 !important;
-    color: #dbe5ff;
-}
-
-body.theme-midnight .table {
-    color: #dbe5ff;
-}
-
-body.theme-forest {
-    background: #edf6ef;
-    color: #1f3b2b;
-}
-
-body.theme-forest .card,
-body.theme-forest .card-header {
-    background: #f8fffa !important;
-}
-
+/* One site-wide surface (homepage palette); accent themes are folded to the same surfaces */
+body.theme-classic,
+body.theme-midnight,
+body.theme-forest,
 body.theme-royal {
-    background: #eef3ff;
-    color: #1d2f57;
+    background: var(--eschen-body-bg);
+    color: var(--eschen-body-color);
 }
 
-body.theme-royal .card,
+body.theme-classic .card,
+body.theme-midnight .card,
+body.theme-forest .card,
+body.theme-royal .card {
+    background: var(--eschen-card-bg);
+    color: var(--eschen-body-color);
+}
+
+body.theme-classic .card-header,
+body.theme-midnight .card-header,
+body.theme-forest .card-header,
 body.theme-royal .card-header {
-    background: #f9fbff !important;
+    background: var(--eschen-card-bg) !important;
+    color: var(--eschen-body-color);
+}
+
+body.theme-classic .table,
+body.theme-midnight .table,
+body.theme-forest .table,
+body.theme-royal .table {
+    color: var(--eschen-body-color);
+}
+
+.navbar.navbar-dark.bg-dark {
+    background-color: var(--eschen-nav-bg) !important;
+}
+
+.site-footer {
+    background-color: var(--eschen-body-bg);
 }
