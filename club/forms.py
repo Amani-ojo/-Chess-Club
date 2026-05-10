@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 from .models import ContactMessage, Member, UserProfile
 
@@ -25,12 +26,39 @@ class UserProfileForm(forms.ModelForm):
 
 
 class MemberProfileForm(forms.ModelForm):
+    avatar_max_mb = 4
+
     class Meta:
         model = Member
         fields = ('display_name', 'avatar')
         widgets = {
             'display_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'avatar': forms.ClearableFileInput(
+                attrs={
+                    'class': 'form-control',
+                    'accept': 'image/jpeg,image/png,image/webp,image/gif',
+                },
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['avatar'].required = False
+        self.fields['avatar'].help_text = (
+            f'JPEG, PNG, WebP, or GIF. Maximum file size roughly {self.avatar_max_mb} MB. '
+            'Clear the checkbox below to remove the current photo.'
+        )
+
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get('avatar')
+        if avatar and getattr(avatar, 'size', 0):
+            limit = self.avatar_max_mb * 1024 * 1024
+            if avatar.size > limit:
+                raise ValidationError(
+                    f'Please use an image under {self.avatar_max_mb} MB.',
+                    code='avatar_too_large',
+                )
+        return avatar
 
 
 class ContactForm(forms.ModelForm):

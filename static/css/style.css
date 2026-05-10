@@ -59,3 +59,30 @@ main {
         overflow-y: auto;
     }
 }
+
+/* Member avatars (uploaded or initials fallback) */
+.member-avatar-img {
+    border: 2px solid rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+}
+
+.member-avatar-placeholder {
+    color: #fff;
+    background: linear-gradient(145deg, #3d5a80, #1d3557);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+}
+
+.table-avatar-col {
+    width: 3.25rem;
+}
+
+.member-profile-head .member-avatar-img {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.theme-midnight .member-avatar-placeholder,
+.theme-forest .member-avatar-placeholder,
+.theme-royal .member-avatar-placeholder {
+    filter: brightness(1.05);
+}

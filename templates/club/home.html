@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load member_tags %}
 
 {% block title %}Eschen Chess Club{% endblock %}
 
@@ -69,9 +70,12 @@
                     <ol class="list-group list-group-flush list-group-numbered mb-0 home-rank-list">
                         {% for m in top_players %}
                             <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                                <div class="min-w-0">
-                                    <a class="fw-medium text-truncate d-block" href="{% url 'club:member_detail' m.pk %}">{{ m.display_name }}</a>
-                                    <span class="small text-muted">OTB {{ m.wins }}W · {{ m.draws }}D · {{ m.losses }}L</span>
+                                <div class="d-flex align-items-center gap-2 min-w-0 flex-grow-1">
+                                    {% member_avatar m 40 %}
+                                    <div class="min-w-0">
+                                        <a class="fw-medium text-truncate d-block" href="{% url 'club:member_detail' m.pk %}">{{ m.display_name }}</a>
+                                        <span class="small text-muted">OTB {{ m.wins }}W · {{ m.draws }}D · {{ m.losses }}L</span>
+                                    </div>
                                 </div>
                                 <span class="badge text-bg-light text-nowrap">{{ m.elo_rating|floatformat:0 }} ELO</span>
                             </li>
@@ -140,9 +144,12 @@
                 <div class="card border-0 shadow-sm">
                     <ul class="list-group list-group-flush mb-0">
                         {% for member in recent_members %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{% url 'club:member_detail' member.pk %}">{{ member.display_name }}</a>
-                                <span class="small text-muted text-truncate ms-2" style="max-width: 9rem;">@{{ member.lichess_username|default:"—" }}</span>
+                            <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2 min-w-0">
+                                    {% member_avatar member 36 %}
+                                    <a class="text-truncate" href="{% url 'club:member_detail' member.pk %}">{{ member.display_name }}</a>
+                                </div>
+                                <span class="small text-muted text-truncate" style="max-width: 9rem;">@{{ member.lichess_username|default:"—" }}</span>
                             </li>
                         {% empty %}
                             <li class="list-group-item text-muted">No members in the directory.</li>

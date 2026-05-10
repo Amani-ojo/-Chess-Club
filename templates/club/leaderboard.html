@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load member_tags %}
 
 {% block title %}Leaderboard{% endblock %}
 
@@ -18,6 +19,7 @@
             <thead class="table-light">
             <tr>
                 <th class="table-rank-col">#</th>
+                <th class="table-avatar-col" scope="col"><span class="visually-hidden">Photo</span></th>
                 <th>Member</th>
                 <th>Club ELO</th>
                 <th>W</th>
@@ -30,7 +32,8 @@
             {% for m in members %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td><a href="{% url 'club:member_detail' m.pk %}">{{ m.display_name }}</a></td>
+                    <td class="align-middle">{% member_avatar m 36 %}</td>
+                    <td class="align-middle"><a href="{% url 'club:member_detail' m.pk %}">{{ m.display_name }}</a></td>
                     <td>{{ m.elo_rating|floatformat:0 }}</td>
                     <td>{{ m.wins }}</td>
                     <td>{{ m.draws }}</td>
@@ -44,7 +47,7 @@
                     </td>
                 </tr>
             {% empty %}
-                <tr><td colspan="7" class="text-muted p-4">Record club matches from the admin to populate standings.</td></tr>
+                <tr><td colspan="8" class="text-muted p-4">Record club matches from the admin to populate standings.</td></tr>
             {% endfor %}
             </tbody>
         </table>
