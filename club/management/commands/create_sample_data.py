@@ -1,4 +1,4 @@
-"""Seed deterministic demo OTB matches, announcements, and members for staging / Codespaces."""
+"""Seed OTB matches, announcements, members, and teams for staging (e.g. Codespaces)."""
 
 from datetime import timedelta
 
@@ -7,50 +7,73 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
+from club.constants import CLUB_PRIMARY_VENUE
 from club.models import Announcement, Match, Member, Team, TeamMembership
 
 User = get_user_model()
 
-# Tagged data can be wiped with --purge-demo (lichess_username suffix + venue substring).
+# Members identifiable for --purge-seed (and legacy handles from older seeds).
 MEMBER_SPECS = [
-    ('Marie Weber', 'marie_eschen_demo'),
-    ('Luca Büchel', 'luca_eschen_demo'),
-    ('Nina Klaus', 'nina_eschen_demo'),
-    ('Jonas Quaderer', 'jonas_eschen_demo'),
-    ('Sophie Meier', 'sophie_eschen_demo'),
-    ('Markus Schädler', 'markus_eschen_demo'),
-    ('Elena Beck', 'elena_eschen_demo'),
-    ('Bruno Marxer', 'bruno_eschen_demo'),
-    ('Alice Club', 'alice_club_demo'),
-    ('Bob Club', 'bob_club_demo'),
+    ('Marie Weber', 'mweber_eschen'),
+    ('Luca Büchel', 'lbuechel_eschen'),
+    ('Nina Klaus', 'nklaus_eschen'),
+    ('Jonas Quaderer', 'jquaderer_eschen'),
+    ('Sophie Meier', 'smeier_eschen'),
+    ('Markus Schädler', 'mschaedler_eschen'),
+    ('Elena Beck', 'ebeck_eschen'),
+    ('Bruno Marxer', 'bmarxer_eschen'),
+    ('Alice Winter', 'awinter_eschen'),
+    ('Bob Feger', 'bfeger_eschen'),
 ]
+
+SEED_MEMBER_LICHESS = frozenset(spec[1] for spec in MEMBER_SPECS)
+
+LEGACY_MEMBER_LICHESS = frozenset(
+    {
+        'marie_eschen_demo',
+        'luca_eschen_demo',
+        'nina_eschen_demo',
+        'jonas_eschen_demo',
+        'sophie_eschen_demo',
+        'markus_eschen_demo',
+        'elena_eschen_demo',
+        'bruno_eschen_demo',
+        'alice_club_demo',
+        'bob_club_demo',
+    }
+)
+
+CLUB_DEFAULT_VENUE = CLUB_PRIMARY_VENUE
 
 ANNOUNCEMENTS = [
     (
-        '[Demo] Autumn rapid league begins 15 October',
-        'Round-robin at the club hall starts next week; pairings publish after close of registrations. Volunteers for setup: reply on the bulletin board.',
+        'Herbst-Schnellschach: erste Runden ab 15. Oktober',
+        'Wir starten wieder mit einer kleinen Rundenturnier-Gruppe am Vereinsabend. Anmeldung bis eine Woche vorher beim Vorstand.',
     ),
     (
-        '[Demo] New digital pairings kiosk',
-        'The entrance tablet now mirrors today’s scheduled boards. Speak to Markus if pairing software shows stale data;',
+        'Parkplatz Gemeindehaus Eschen — kurze Hinweise',
+        'Am Donnerstagabend oft parallel Veranstaltung: kurzzeitig Parkfelder nördlich des Platzes oder öV (Bus Richtung Eschen/Zentrum) bevorzugen.',
     ),
     (
-        '[Demo] Youth ladder — Sunday mornings',
-        'Beginners welcome 09:45 at Schulhaus Eschen; coaches Nora and Luca rotate weekly.',
+        'Jugendstunde Sundays, Schulhaus Eschen',
+        'Einsteiger:innen von 09:45 Uhr mit kurzen Unterrichtseinheiten plus freies Spielen. Betreuung wechselt zwischen Luca und Nora.',
     ),
     (
-        '[Demo] FIDE handbook update',
-        'Tournament organisers: default time controls for club events now follow appendix guidelines published this month;',
+        'Zeitkontrollen nach FIDE-Anhang für Club-Opens',
+        'Für offene Vereinsranglisten gelten wieder die gleichen Standards wie in den Landesmeisterschaften des Fürstentums (90+30 klassisch wo ausgeschrieben).',
     ),
     (
-        '[Demo] Welcome to the Eschen public portal',
-        'Announcements and OTB results stay on this site; members can optionally link personal Lichess accounts from the dashboard after login.',
+        'Willkommen am öffentlichen Vereinsportal',
+        'Über diese Seite erscheinen Spieltermine und interne Rundschreiben. Persönliche Lichess-Spiele können nach Login ergänzend importiert werden.',
     ),
 ]
 
 
 class Command(BaseCommand):
-    help = 'Seed Eschen-themed demo members, announcements, scheduled matches, and OTB history (optional --purge-demo).'
+    help = (
+        'Seed Eschen-themed sample members, announcements, matches, and teams. '
+        'Use --purge-seed before re-running to remove prior seed rows; --purge-demo is a deprecated alias.'
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -59,17 +82,26 @@ class Command(BaseCommand):
             help='Clear all OTB matches and ELO history, reset member club ratings.',
         )
         parser.add_argument(
+            '--purge-seed',
+            action='store_true',
+            help=(
+                'Remove seed members (current + legacy handles), seed announcements '
+                '(by title match), then re-run a clean import.'
+            ),
+        )
+        parser.add_argument(
             '--purge-demo',
             action='store_true',
-            help='Remove previously seeded demo entities (members with *_eschen_demo / *_club_demo, venue containing [demo], titles starting [Demo]).',
+            help='Deprecated: same as --purge-seed.',
         )
 
     def handle(self, *args, **options):
         from club.models import EloHistory
         from club.services.match_elo import recalculate_all_club_elo
 
-        if options['purge_demo']:
-            self._purge_demo()
+        if options['purge_seed'] or options['purge_demo']:
+            self._purge_seed()
+
         if options['reset_club_stats']:
             Match.objects.all().delete()
             EloHistory.objects.all().delete()
@@ -98,23 +130,13 @@ class Command(BaseCommand):
 
             by_lichess = {m.lichess_username: m for m in members}
             now = timezone.now()
-            venue_demo = 'Eschen club hall · [demo]'
 
-            # Upcoming — stable offsets from "now"
             upcoming_specs = [
-                (by_lichess['marie_eschen_demo'], by_lichess['luca_eschen_demo'], now + timedelta(days=2, hours=18)),
-                (by_lichess['nina_eschen_demo'], by_lichess['jonas_eschen_demo'], now + timedelta(days=5, hours=17, minutes=30)),
-                (by_lichess['sophie_eschen_demo'], by_lichess['markus_eschen_demo'], now + timedelta(days=9, hours=14)),
-                (
-                    by_lichess['elena_eschen_demo'],
-                    by_lichess['bruno_eschen_demo'],
-                    now + timedelta(days=12, hours=19),
-                ),
-                (
-                    by_lichess['alice_club_demo'],
-                    by_lichess['bob_club_demo'],
-                    now + timedelta(days=14, hours=16),
-                ),
+                (by_lichess['mweber_eschen'], by_lichess['lbuechel_eschen'], now + timedelta(days=2, hours=18)),
+                (by_lichess['nklaus_eschen'], by_lichess['jquaderer_eschen'], now + timedelta(days=5, hours=17, minutes=30)),
+                (by_lichess['smeier_eschen'], by_lichess['mschaedler_eschen'], now + timedelta(days=9, hours=14)),
+                (by_lichess['ebeck_eschen'], by_lichess['bmarxer_eschen'], now + timedelta(days=12, hours=19)),
+                (by_lichess['awinter_eschen'], by_lichess['bfeger_eschen'], now + timedelta(days=14, hours=16)),
             ]
             for white, black, start in upcoming_specs:
                 if not Match.objects.filter(
@@ -126,25 +148,24 @@ class Command(BaseCommand):
                         white_player=white,
                         black_player=black,
                         status=Match.STATUS_SCHEDULED,
-                        venue=venue_demo,
+                        venue=CLUB_DEFAULT_VENUE,
                         scheduled_at=start,
                     )
 
-            # Historical completed — deterministic spread of results (applied in order below)
             base = now - timedelta(days=120)
             completed_rows = [
-                (by_lichess['marie_eschen_demo'], by_lichess['luca_eschen_demo'], Match.RESULT_WHITE, base),
-                (by_lichess['nina_eschen_demo'], by_lichess['sophie_eschen_demo'], Match.RESULT_BLACK, base + timedelta(days=7)),
-                (by_lichess['markus_eschen_demo'], by_lichess['marie_eschen_demo'], Match.RESULT_DRAW, base + timedelta(days=14)),
-                (by_lichess['luca_eschen_demo'], by_lichess['jonas_eschen_demo'], Match.RESULT_WHITE, base + timedelta(days=21)),
-                (by_lichess['bruno_eschen_demo'], by_lichess['elena_eschen_demo'], Match.RESULT_WHITE, base + timedelta(days=28)),
-                (by_lichess['alice_club_demo'], by_lichess['bob_club_demo'], Match.RESULT_WHITE, base + timedelta(days=35)),
-                (by_lichess['bob_club_demo'], by_lichess['alice_club_demo'], Match.RESULT_DRAW, base + timedelta(days=42)),
-                (by_lichess['sophie_eschen_demo'], by_lichess['nina_eschen_demo'], Match.RESULT_WHITE, base + timedelta(days=49)),
-                (by_lichess['jonas_eschen_demo'], by_lichess['markus_eschen_demo'], Match.RESULT_BLACK, base + timedelta(days=56)),
-                (by_lichess['elena_eschen_demo'], by_lichess['marie_eschen_demo'], Match.RESULT_BLACK, base + timedelta(days=63)),
-                (by_lichess['marie_eschen_demo'], by_lichess['bruno_eschen_demo'], Match.RESULT_WHITE, base + timedelta(days=70)),
-                (by_lichess['markus_eschen_demo'], by_lichess['luca_eschen_demo'], Match.RESULT_DRAW, base + timedelta(days=77)),
+                (by_lichess['mweber_eschen'], by_lichess['lbuechel_eschen'], Match.RESULT_WHITE, base),
+                (by_lichess['nklaus_eschen'], by_lichess['smeier_eschen'], Match.RESULT_BLACK, base + timedelta(days=7)),
+                (by_lichess['mschaedler_eschen'], by_lichess['mweber_eschen'], Match.RESULT_DRAW, base + timedelta(days=14)),
+                (by_lichess['lbuechel_eschen'], by_lichess['jquaderer_eschen'], Match.RESULT_WHITE, base + timedelta(days=21)),
+                (by_lichess['bmarxer_eschen'], by_lichess['ebeck_eschen'], Match.RESULT_WHITE, base + timedelta(days=28)),
+                (by_lichess['awinter_eschen'], by_lichess['bfeger_eschen'], Match.RESULT_WHITE, base + timedelta(days=35)),
+                (by_lichess['bfeger_eschen'], by_lichess['awinter_eschen'], Match.RESULT_DRAW, base + timedelta(days=42)),
+                (by_lichess['smeier_eschen'], by_lichess['nklaus_eschen'], Match.RESULT_WHITE, base + timedelta(days=49)),
+                (by_lichess['jquaderer_eschen'], by_lichess['mschaedler_eschen'], Match.RESULT_BLACK, base + timedelta(days=56)),
+                (by_lichess['ebeck_eschen'], by_lichess['mweber_eschen'], Match.RESULT_BLACK, base + timedelta(days=63)),
+                (by_lichess['mweber_eschen'], by_lichess['bmarxer_eschen'], Match.RESULT_WHITE, base + timedelta(days=70)),
+                (by_lichess['mschaedler_eschen'], by_lichess['lbuechel_eschen'], Match.RESULT_DRAW, base + timedelta(days=77)),
             ]
             for white, black, result, scheduled in completed_rows:
                 completed_at = scheduled + timedelta(hours=3)
@@ -155,43 +176,48 @@ class Command(BaseCommand):
                     black_player=black,
                     status=Match.STATUS_COMPLETED,
                     result=result,
-                    venue=venue_demo,
+                    venue=CLUB_DEFAULT_VENUE,
                     scheduled_at=scheduled,
                     completed_at=completed_at,
                 )
 
             for idx, (title, body) in enumerate(ANNOUNCEMENTS):
                 published = now - timedelta(days=idx * 4 + 1)
-                ann, created = Announcement.objects.get_or_create(
+                ann, created_ann = Announcement.objects.get_or_create(
                     title=title,
                     defaults={'body': body, 'published_at': published, 'author': admin_user},
                 )
-                if not created:
+                if not created_ann:
                     ann.body = body
                     ann.published_at = published
                     ann.author = admin_user
                     ann.save()
 
             team, _ = Team.objects.get_or_create(
-                name='Eschen Rapid Squad',
-                defaults={'description': 'Weekly OTB rapid practice squad (demo team).'},
+                name='Eschen Schnellschach Squad',
+                defaults={'description': 'Wöchentliche OTB Rapid-Runden im Vereinsbetrieb Eschen.'},
             )
             for m in members[:8]:
                 TeamMembership.objects.get_or_create(team=team, member=m, defaults={'role': TeamMembership.ROLE_MEMBER})
 
-        # Single rebuild guarantees W/L/ELO coherence if any rows were skipped mid-flight
         n = recalculate_all_club_elo()
-        self.stdout.write(self.style.SUCCESS(f'Demo seeded; replayed {n} completed matches for OTB ratings.'))
+        self.stdout.write(self.style.SUCCESS(f'Sample data seeded; replayed {n} completed OTB matches for ratings.'))
 
-    def _purge_demo(self):
-        """Remove identifiable demo residue so re-seeding stays clean."""
-        demo_usernames_suffixes = ('_eschen_demo', '_club_demo')
-        qs_members = Member.objects.filter(
-            lichess_username__in=[spec[1] for spec in MEMBER_SPECS],
-        )
+    def _purge_seed(self):
+        """Drop seed-labelled members plus legacy *_demo aliases; related matches/history cascade."""
+        to_delete = LEGACY_MEMBER_LICHESS | SEED_MEMBER_LICHESS
+        qs_members = Member.objects.filter(lichess_username__in=to_delete)
         total_deleted, _by_model = qs_members.delete()
         self.stdout.write(
-            self.style.WARNING(f'Removed demo graph ({total_deleted} database rows including dependent matches/history).')
+            self.style.WARNING(
+                f'Removed prior seed footprint ({total_deleted} database rows, including cascading matches/ELO rows).'
+            )
         )
 
+        seed_titles = [t for t, _ in ANNOUNCEMENTS]
+        Announcement.objects.filter(title__in=seed_titles).delete()
         Announcement.objects.filter(title__startswith='[Demo]').delete()
+
+        Team.objects.filter(
+            name__in=('Eschen Rapid Squad', 'Eschen Schnellschach Squad'),
+        ).delete()

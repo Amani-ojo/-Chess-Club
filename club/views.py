@@ -11,6 +11,7 @@ from django.utils import timezone
 from ai_pipeline.models import Game
 from ai_pipeline.tasks import fetch_lichess_games_task
 
+from .constants import CLUB_PRIMARY_VENUE
 from .forms import ContactForm, MemberProfileForm, RegisterForm, UserProfileForm
 from .member_utils import sync_member_with_user
 from .models import Announcement, Match, Member, Team, TeamMembership, UserProfile
@@ -138,7 +139,11 @@ def about_view(request):
             return redirect('club:about')
     else:
         form = ContactForm()
-    return render(request, 'club/about.html', {'form': form})
+    return render(
+        request,
+        'club/about.html',
+        {'form': form, 'club_primary_venue': CLUB_PRIMARY_VENUE},
+    )
 
 
 def register_view(request):

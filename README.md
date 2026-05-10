@@ -76,7 +76,7 @@ The project is built incrementally across the following phases. Each phase is a 
 
 > Branch: `feature/sample-data`
 
-- [x] `python manage.py create_sample_data` (add `--purge-demo` to replace tagged demo rows, `--reset-club-stats` to wipe OTB history)
+- [x] `python manage.py create_sample_data` (`--purge-seed` resets bundled sample members/announcements, `--purge-demo` is a deprecated alias, `--reset-club-stats` wipes OTB tables)
 - [x] Optional `fixtures/` omitted in favour of the management command
 - [x] WhiteNoise static storage, `python-decouple`, `.env.example`
 - [x] Operational README updates (deployment QA remains environment-specific)

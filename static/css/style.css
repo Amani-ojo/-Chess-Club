@@ -86,3 +86,12 @@ main {
 .theme-royal .member-avatar-placeholder {
     filter: brightness(1.05);
 }
+
+.club-history .timeline-markers {
+    padding-left: 1.1rem;
+    max-width: 40rem;
+}
+
+.club-history .timeline-markers li + li {
+    margin-top: 0.65rem;
+}
