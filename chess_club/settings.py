@@ -23,6 +23,15 @@ if not DEBUG:
         )
     SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=True, cast=bool)
     CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)
+    # TLS / reverse-proxy (set USE_X_FORWARDED_PROTO when behind nginx, Traefik, or a load balancer)
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=0, cast=int)
+    if SECURE_HSTS_SECONDS > 0:
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=False, cast=bool)
+        SECURE_HSTS_PRELOAD = config('SECURE_HSTS_PRELOAD', default=False, cast=bool)
+    USE_X_FORWARDED_HOST = config('USE_X_FORWARDED_HOST', default=False, cast=bool)
+    if config('USE_X_FORWARDED_PROTO', default=False, cast=bool):
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 _csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='')
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
@@ -130,10 +139,16 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
 
 LICHESS_API_BASE_URL = os.getenv('LICHESS_API_BASE_URL', 'https://lichess.org/api')
 LICHESS_API_TOKEN = os.getenv('LICHESS_API_TOKEN', '')
-STOCKFISH_PATH = os.getenv(
-    'STOCKFISH_PATH',
-    str(BASE_DIR.parent / 'ai_pipeline' / 'bin' / 'stockfish_extracted' / 'stockfish' / 'stockfish-windows-x86-64-avx2.exe'),
-)
+if os.name == 'nt':
+    _default_stockfish_path = str(
+        BASE_DIR.parent / 'ai_pipeline' / 'bin' / 'stockfish_extracted' / 'stockfish' / 'stockfish-windows-x86-64-avx2.exe'
+    )
+elif os.path.exists('/usr/games/stockfish'):
+    _default_stockfish_path = '/usr/games/stockfish'
+else:
+    _default_stockfish_path = '/opt/homebrew/bin/stockfish'
+
+STOCKFISH_PATH = os.getenv('STOCKFISH_PATH', _default_stockfish_path)
 STOCKFISH_DEPTH = int(os.getenv('STOCKFISH_DEPTH', '12'))
 STOCKFISH_THREADS = int(os.getenv('STOCKFISH_THREADS', '1'))
 STOCKFISH_HASH_MB = int(os.getenv('STOCKFISH_HASH_MB', '128'))
