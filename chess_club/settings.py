@@ -43,6 +43,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.github',
+    'allauth.socialaccount.providers.microsoft',
     'django_otp',
     'django_otp.plugins.otp_totp',
     'crispy_forms',
@@ -60,10 +67,58 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# --- django-allauth (OAuth sign-in; Lichess linking stays on the dashboard) ---
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_LOGIN_ON_GET = False
+ACCOUNT_UNIQUE_EMAIL = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_ADAPTER = 'club.adapters.ClubSocialAccountAdapter'
+
+_SOCIAL_PROVIDERS: dict = {}
+
+_google_id = config('GOOGLE_OAUTH_CLIENT_ID', default='').strip()
+_google_secret = config('GOOGLE_OAUTH_CLIENT_SECRET', default='').strip()
+if _google_id and _google_secret:
+    _SOCIAL_PROVIDERS['google'] = {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'APP': {'client_id': _google_id, 'secret': _google_secret, 'key': ''},
+    }
+
+_github_id = config('GITHUB_OAUTH_CLIENT_ID', default='').strip()
+_github_secret = config('GITHUB_OAUTH_CLIENT_SECRET', default='').strip()
+if _github_id and _github_secret:
+    _SOCIAL_PROVIDERS['github'] = {
+        'SCOPE': ['user:email'],
+        'APP': {'client_id': _github_id, 'secret': _github_secret, 'key': ''},
+    }
+
+_ms_id = config('MICROSOFT_OAUTH_CLIENT_ID', default='').strip()
+_ms_secret = config('MICROSOFT_OAUTH_CLIENT_SECRET', default='').strip()
+if _ms_id and _ms_secret:
+    _ms_tenant = config('MICROSOFT_OAUTH_TENANT', default='common').strip() or 'common'
+    _SOCIAL_PROVIDERS['microsoft'] = {
+        'TENANT': _ms_tenant,
+        'APP': {'client_id': _ms_id, 'secret': _ms_secret, 'key': ''},
+    }
+
+SOCIALACCOUNT_PROVIDERS = _SOCIAL_PROVIDERS
 
 ROOT_URLCONF = 'chess_club.urls'
 

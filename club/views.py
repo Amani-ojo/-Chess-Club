@@ -4,7 +4,6 @@ from datetime import timedelta
 from urllib.parse import quote
 
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.db.models import Prefetch, Q
@@ -21,7 +20,7 @@ from ai_pipeline.models import Game
 from ai_pipeline.tasks import fetch_lichess_games_task
 
 from .constants import CLUB_PRIMARY_VENUE
-from .forms import ContactForm, MemberProfileForm, RegisterForm, UserProfileForm
+from .forms import ContactForm, MemberProfileForm, UserProfileForm
 from .member_utils import sync_member_with_user
 from .models import (
     Announcement,
@@ -282,20 +281,7 @@ def about_view(request):
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('club:dashboard')
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            UserProfile.objects.get_or_create(user=user)
-            sync_member_with_user(user, '')
-            login(request, user)
-            gate = otp_session_redirect_if_needed(request)
-            if gate:
-                return gate
-            return redirect('club:dashboard')
-    else:
-        form = RegisterForm()
-    return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'registration/register.html', {})
 
 
 @login_required
