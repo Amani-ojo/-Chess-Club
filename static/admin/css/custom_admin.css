@@ -248,3 +248,169 @@ select {
 body.popup #content-main {
     box-shadow: none;
 }
+
+/* --- Admin: application log viewer (/admin/diagnostics/application-logs/) --- */
+.app-log-nav-link {
+    color: rgba(255, 255, 255, 0.92) !important;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    margin-inline-end: 1rem;
+    text-decoration: none;
+}
+
+.app-log-nav-link:hover,
+.app-log-nav-link:focus {
+    color: #fff !important;
+    text-decoration: underline;
+}
+
+.app-log-viewer__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.app-log-viewer__title {
+    margin: 0 0 0.25rem;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--body-loud-color);
+}
+
+.app-log-viewer__subtitle {
+    margin: 0;
+    max-width: 42rem;
+    color: var(--body-quiet-color);
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+.app-log-viewer__meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.app-log-viewer__meta-table th {
+    text-align: start;
+    width: 11rem;
+    padding: 0.35rem 0.75rem 0.35rem 0;
+    color: var(--body-medium-color);
+    font-weight: 600;
+    vertical-align: top;
+}
+
+.app-log-viewer__meta-table td {
+    padding: 0.35rem 0;
+    word-break: break-all;
+}
+
+.app-log-viewer__meta-table code {
+    font-size: 0.8125rem;
+    background: var(--darkened-bg);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+}
+
+.app-log-viewer .quiet {
+    color: var(--body-quiet-color);
+}
+
+.app-log-viewer__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.app-log-viewer__field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--body-medium-color);
+    margin-bottom: 0.25rem;
+}
+
+.app-log-viewer__field select,
+.app-log-viewer__field input[type="number"] {
+    min-width: 8rem;
+}
+
+.app-log-viewer__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.app-log-viewer__help {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--body-quiet-color);
+}
+
+.app-log-viewer__scroll {
+    max-height: min(70vh, 52rem);
+    overflow: auto;
+    border: 1px solid var(--hairline-color);
+    border-radius: 4px;
+    background: #0f172a;
+}
+
+.app-log-viewer__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+.app-log-viewer__row td {
+    padding: 0.15rem 0.5rem;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.app-log-viewer__ln {
+    width: 3rem;
+    text-align: right;
+    color: #64748b;
+    user-select: none;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.app-log-viewer__text code {
+    display: block;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #e2e8f0;
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+}
+
+.app-log-viewer__row.log-line--error .app-log-viewer__text code {
+    color: #fecaca;
+}
+
+.app-log-viewer__row.log-line--warning .app-log-viewer__text code {
+    color: #fde68a;
+}
+
+.app-log-viewer__row.log-line--info .app-log-viewer__text code {
+    color: #bae6fd;
+}
+
+.app-log-viewer__row.log-line--debug .app-log-viewer__text code {
+    color: #c4b5fd;
+}
+
+.app-log-viewer__row.log-line--plain .app-log-viewer__text code {
+    color: #cbd5e1;
+}

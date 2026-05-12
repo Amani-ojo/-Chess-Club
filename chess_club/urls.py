@@ -10,7 +10,14 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from club.admin_log_view import application_log_view
+
 urlpatterns = [
+    path(
+        'admin/diagnostics/application-logs/',
+        admin.site.admin_view(application_log_view),
+        name='admin_application_logs',
+    ),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', include('club.urls')),

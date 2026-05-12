@@ -133,6 +133,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'club.context_processors.user_theme',
+                'club.context_processors.admin_log_nav',
             ],
         },
     },
@@ -236,4 +237,76 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Eschen Chess Club API',
     'DESCRIPTION': 'Interactive API surface for pipeline functions and diagnostics.',
     'VERSION': '1.0.0',
+}
+
+# --- Application logging (errors & diagnostics; see logs/application.log) ---
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+APP_LOG_LEVEL = config('APP_LOG_LEVEL', default='INFO')
+APP_LOG_MAX_BYTES = config('APP_LOG_MAX_BYTES', default=10 * 1024 * 1024, cast=int)
+APP_LOG_BACKUP_COUNT = config('APP_LOG_BACKUP_COUNT', default=5, cast=int)
+APP_LOG_FILE = config('APP_LOG_FILE', default=str(LOGS_DIR / 'application.log'))
+APP_LOG_ADMIN_SUPERUSER_ONLY = config('APP_LOG_ADMIN_SUPERUSER_ONLY', default=True, cast=bool)
+APP_LOG_ADMIN_MAX_LINES = config('APP_LOG_ADMIN_MAX_LINES', default=5000, cast=int)
+APP_LOG_ADMIN_TAIL_BYTES = config('APP_LOG_ADMIN_TAIL_BYTES', default=512 * 1024, cast=int)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {name} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': APP_LOG_LEVEL,
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': APP_LOG_FILE,
+            'maxBytes': APP_LOG_MAX_BYTES,
+            'backupCount': APP_LOG_BACKUP_COUNT,
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': APP_LOG_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': APP_LOG_LEVEL,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': APP_LOG_LEVEL,
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'club': {
+            'handlers': ['console', 'file'],
+            'level': APP_LOG_LEVEL,
+            'propagate': False,
+        },
+        'ai_pipeline': {
+            'handlers': ['console', 'file'],
+            'level': APP_LOG_LEVEL,
+            'propagate': False,
+        },
+    },
 }

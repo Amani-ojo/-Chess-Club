@@ -12,6 +12,8 @@ env/
 # Django
 db.sqlite3
 *.log
+logs/
+!logs/.gitkeep
 staticfiles/
 media/avatars/
 
