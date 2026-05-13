@@ -52,7 +52,7 @@
                             <tr>
                                 <td>{{ game.player_white }} vs {{ game.player_black }}</td>
                                 <td>{{ game.result }}</td>
-                                <td>{{ game.played_at|date:"Y-m-d H:i" }}</td>
+                                <td><time datetime="{{ game.played_at|date:'c' }}">{{ game.played_at|date:"M j, Y" }}</time></td>
                                 <td class="d-flex gap-2">
                                     <a href="{% url 'ai_pipeline:game_analysis' game.lichess_game_id|default:game.pk %}" class="btn btn-sm btn-primary">Stockfish</a>
                                     <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'json' %}" class="btn btn-sm btn-outline-secondary">JSON</a>
@@ -91,7 +91,8 @@
                     <div class="dashboard-pair-intro small text-muted mb-2 flex-shrink-0">
                         <p class="mb-0">Opening / middle / endgame CPL heuristics from completed analyses.</p>
                     </div>
-                    <div class="dashboard-chart-canvas flex-grow-1 flex-shrink-0" aria-hidden="true"><canvas id="skillRadarChart"></canvas></div>
+                    <div class="dashboard-chart-canvas flex-grow-1 flex-shrink-0 position-relative" aria-hidden="true"><canvas id="skillRadarChart"></canvas></div>
+                    <p id="skillRadarEmptyHint" class="small text-muted text-center mb-0 mt-2 d-none" role="status"></p>
                 </div>
             </div>
         </div>
@@ -222,29 +223,62 @@
     }
 
     function renderRadar(radarData) {
+        const labels = (radarData && radarData.labels && radarData.labels.length)
+            ? radarData.labels
+            : ['Opening Accuracy', 'Middlegame Accuracy', 'Endgame Accuracy', 'Tactical Safety'];
+        const values = (radarData && radarData.values && radarData.values.length)
+            ? radarData.values.map((v) => (typeof v === 'number' && Number.isFinite(v) ? v : 0))
+            : [0, 0, 0, 0];
         const ctx = document.getElementById('skillRadarChart').getContext('2d');
         if (radarChart) {
-            radarChart.data.labels = radarData.labels;
-            radarChart.data.datasets[0].data = radarData.values;
+            radarChart.data.labels = labels;
+            radarChart.data.datasets[0].data = values;
             radarChart.update('none');
             return;
         }
         radarChart = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: radarData.labels,
+                labels: labels,
                 datasets: [{
-                    label: 'Skill Profile',
-                    data: radarData.values,
+                    label: 'Skill profile',
+                    data: values,
                     borderColor: '#2b9348',
-                    backgroundColor: 'rgba(43,147,72,0.2)'
+                    backgroundColor: 'rgba(43,147,72,0.22)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                 }]
             },
             options: {
                 ...staticChartOpts,
-                scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
+                plugins: { legend: { display: false } },
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        beginAtZero: true,
+                        ticks: { stepSize: 25, backdropColor: 'transparent' },
+                        grid: { color: 'rgba(0,0,0,0.08)' },
+                        angleLines: { color: 'rgba(0,0,0,0.08)' },
+                    },
+                },
             },
         });
+    }
+
+    function setSkillRadarHint(metrics) {
+        const el = document.getElementById('skillRadarEmptyHint');
+        if (!el) return;
+        const sr = metrics && metrics.skill_radar ? metrics.skill_radar : {};
+        const games = typeof sr.games_analysed === 'number' ? sr.games_analysed : 0;
+        const plies = typeof sr.plies_sampled === 'number' ? sr.plies_sampled : 0;
+        if (games === 0 || plies === 0) {
+            el.textContent = 'No move-level Stockfish data yet. Finish at least one game analysis to populate this radar.';
+            el.classList.remove('d-none');
+        } else {
+            el.classList.add('d-none');
+        }
     }
 
     function renderStandings(rows) {
@@ -273,6 +307,7 @@
     function renderAll(metrics) {
         renderElo(metrics.elo_progress || []);
         renderRadar(metrics.skill_radar || {labels: [], values: []});
+        setSkillRadarHint(metrics);
         renderStandings(metrics.standings || []);
     }
 

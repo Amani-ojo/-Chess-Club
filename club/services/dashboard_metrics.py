@@ -75,10 +75,12 @@ def build_elo_history_for_member(member):
         ratings[white_id] = white_new
         ratings[black_id] = black_new
 
-        label = timezone.localtime(game.played_at).strftime('%Y-%m-%d %H:%M')
+        dt = timezone.localtime(game.played_at)
+        # Short axis label: "May 13" style (no leading zero on day); keep id for tooltip/disambiguation.
+        label = f'{dt.strftime("%b")} {dt.day}'
         history.append(
             {
-                'x': f'{label} · g{game.pk}',
+                'x': f'{label} · #{game.pk}',
                 'y': round(ratings[member.id], 2),
             }
         )
@@ -86,26 +88,35 @@ def build_elo_history_for_member(member):
 
 
 def build_skill_radar(member):
+    labels = ['Opening Accuracy', 'Middlegame Accuracy', 'Endgame Accuracy', 'Tactical Safety']
     if not member:
         return {
-            'labels': ['Opening Accuracy', 'Middlegame Accuracy', 'Endgame Accuracy', 'Tactical Safety'],
-            'values': [0, 0, 0, 0],
+            'labels': labels,
+            'values': [0.0, 0.0, 0.0, 0.0],
+            'games_analysed': 0,
+            'plies_sampled': 0,
         }
 
     analysis_for_member = (
         GameAnalysis.objects.filter(status='completed')
         .filter(Q(game__player_white=member) | Q(game__player_black=member))
         .select_related('game')
-        .distinct()
+        .prefetch_related('move_evaluations')
     )
 
     opening, middlegame, endgame = [], [], []
     tactical_penalty = 0
+    games_analysed = 0
+    plies_sampled = 0
 
     for analysis in analysis_for_member:
         is_white = analysis.game.player_white_id == member.id
-        evals = MoveEvaluation.objects.filter(analysis=analysis, is_white=is_white)
-        for ev in evals:
+        member_moves = [ev for ev in analysis.move_evaluations.all() if ev.is_white == is_white]
+        if not member_moves:
+            continue
+        games_analysed += 1
+        for ev in member_moves:
+            plies_sampled += 1
             if ev.move_number <= 15:
                 opening.append(ev.centipawn_loss)
             elif ev.move_number <= 35:
@@ -117,14 +128,21 @@ def build_skill_radar(member):
 
     def accuracy(cpls):
         if not cpls:
-            return 0
+            return 0.0
         avg_cpl = sum(cpls) / len(cpls)
-        return max(0, min(100, round(100 - (avg_cpl * 0.9), 2)))
+        return float(max(0, min(100, round(100 - (avg_cpl * 0.9), 2))))
 
-    tactical_safety = max(0, min(100, round(100 - tactical_penalty * 2.5, 2)))
+    tactical_safety = float(max(0, min(100, round(100 - tactical_penalty * 2.5, 2))))
     return {
-        'labels': ['Opening Accuracy', 'Middlegame Accuracy', 'Endgame Accuracy', 'Tactical Safety'],
-        'values': [accuracy(opening), accuracy(middlegame), accuracy(endgame), tactical_safety],
+        'labels': labels,
+        'values': [
+            accuracy(opening),
+            accuracy(middlegame),
+            accuracy(endgame),
+            tactical_safety,
+        ],
+        'games_analysed': games_analysed,
+        'plies_sampled': plies_sampled,
     }
 
 

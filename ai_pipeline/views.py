@@ -11,12 +11,15 @@ from club.models import Member
 from .models import Game
 
 
-def _resolve_game(game_id):
+def _resolve_game(game_id, prefetch_analysis_moves=False):
     game_id = str(game_id).strip()
     query = Q(lichess_game_id=game_id)
     if game_id.isdigit():
         query = query | Q(pk=int(game_id))
-    return get_object_or_404(Game, query)
+    qs = Game.objects.select_related('player_white', 'player_black')
+    if prefetch_analysis_moves:
+        qs = qs.prefetch_related('analysis__move_evaluations')
+    return get_object_or_404(qs, query)
 
 
 @login_required
@@ -27,7 +30,7 @@ def game_embed(request, game_id):
 
 @login_required
 def game_analysis_view(request, game_id):
-    game = _resolve_game(game_id)
+    game = _resolve_game(game_id, prefetch_analysis_moves=True)
     analysis = getattr(game, 'analysis', None)
     moves = analysis.move_evaluations.all() if analysis else []
     report = None

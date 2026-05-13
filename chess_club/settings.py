@@ -120,6 +120,10 @@ if _ms_id and _ms_secret:
 
 SOCIALACCOUNT_PROVIDERS = _SOCIAL_PROVIDERS
 
+# Public site URL for OAuth callback hints in templates (no trailing slash). Use behind reverse proxies when
+# request.is_secure() is wrong, e.g. PUBLIC_BASE_URL=https://chesmate1.duckdns.org
+PUBLIC_BASE_URL = config('PUBLIC_BASE_URL', default='').strip().rstrip('/')
+
 ROOT_URLCONF = 'chess_club.urls'
 
 TEMPLATES = [
@@ -134,6 +138,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'club.context_processors.user_theme',
                 'club.context_processors.admin_log_nav',
+                'club.context_processors.oauth_public_base',
             ],
         },
     },

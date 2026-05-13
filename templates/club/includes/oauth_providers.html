@@ -25,10 +25,28 @@
     </div>
 {% else %}
     <div class="alert alert-warning small mb-0">
-        OAuth is not configured. Set at least one of: Google, GitHub, or Microsoft client ID and secret in your
-        environment, then restart the app. Example redirect URIs:
-        <code>http://127.0.0.1:8000/accounts/google/login/callback/</code>,
-        <code>http://127.0.0.1:8000/accounts/github/login/callback/</code>,
-        <code>http://127.0.0.1:8000/accounts/microsoft/login/callback/</code>.
+        <p class="mb-2 fw-semibold">OAuth is not configured on this server yet.</p>
+        <p class="mb-2">
+            Set environment variables for at least one provider, then restart the app:
+            <code>GOOGLE_OAUTH_CLIENT_ID</code> / <code>GOOGLE_OAUTH_CLIENT_SECRET</code>,
+            <code>GITHUB_OAUTH_CLIENT_ID</code> / <code>GITHUB_OAUTH_CLIENT_SECRET</code>, or
+            <code>MICROSOFT_OAUTH_CLIENT_ID</code> / <code>MICROSOFT_OAUTH_CLIENT_SECRET</code>.
+        </p>
+        {% if oauth_public_base %}
+        <p class="mb-1 fw-semibold">Register these <em>exact</em> redirect URIs with each provider (this host):</p>
+        <ul class="mb-2 ps-3">
+            <li><code>{{ oauth_public_base }}/accounts/google/login/callback/</code></li>
+            <li><code>{{ oauth_public_base }}/accounts/github/login/callback/</code></li>
+            <li><code>{{ oauth_public_base }}/accounts/microsoft/login/callback/</code></li>
+        </ul>
+        <p class="mb-2 text-muted">
+            If the scheme is wrong (e.g. you use HTTPS but links show <code>http://</code>), set
+            <code>PUBLIC_BASE_URL=https://your.domain</code> in the environment and ensure
+            <code>USE_X_FORWARDED_PROTO=True</code> when TLS terminates at a reverse proxy.
+        </p>
+        {% endif %}
+        <p class="mb-0 text-muted">Local development examples:
+            <code>http://127.0.0.1:8000/accounts/google/login/callback/</code> (and the same path for GitHub / Microsoft).
+        </p>
     </div>
 {% endif %}
