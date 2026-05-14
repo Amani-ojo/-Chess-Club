@@ -6,6 +6,7 @@ from urllib.parse import quote
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Prefetch, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -34,6 +35,8 @@ from .models import (
 from .otp_gate import otp_session_redirect_if_needed, otp_verified_safe, resolve_safe_next
 from .queries import members_for_leaderboard
 from .services.dashboard_metrics import build_dashboard_metrics, member_games_for_player
+
+DASHBOARD_IMPORTED_GAMES_PER_PAGE = 6
 from .services.swiss_pairing import tournament_standings_rows
 
 
@@ -310,7 +313,7 @@ def dashboard_view(request):
             messages.success(request, 'Game import started. Refresh shortly to see imported games.')
             return redirect('club:dashboard')
 
-    games = []
+    games_page = None
     if profile.lichess_username:
         member = sync_member_with_user(request.user, profile.lichess_username)
 
@@ -326,7 +329,15 @@ def dashboard_view(request):
                 profile.save(update_fields=['last_lichess_sync_requested_at'])
                 auto_sync_queued = True
 
-        games = member_games_for_player(member)[:20]
+        games_qs = member_games_for_player(member)
+        paginator = Paginator(games_qs, DASHBOARD_IMPORTED_GAMES_PER_PAGE)
+        raw_page = request.GET.get('games_page', 1)
+        try:
+            games_page = paginator.page(raw_page)
+        except PageNotAnInteger:
+            games_page = paginator.page(1)
+        except EmptyPage:
+            games_page = paginator.page(paginator.num_pages or 1)
 
     metrics = build_dashboard_metrics(request.user, profile)
     return render(
@@ -335,7 +346,7 @@ def dashboard_view(request):
         {
             'form': form,
             'profile': profile,
-            'games': games,
+            'games_page': games_page,
             'auto_sync_queued': auto_sync_queued,
             'metrics': metrics,
         },

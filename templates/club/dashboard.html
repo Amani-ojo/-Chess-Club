@@ -48,7 +48,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                        {% for game in games %}
+                        {% if games_page is not None %}
+                            {% for game in games_page %}
                             <tr>
                                 <td>{{ game.player_white }} vs {{ game.player_black }}</td>
                                 <td>{{ game.result }}</td>
@@ -59,12 +60,30 @@
                                     <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'csv' %}" class="btn btn-sm btn-outline-secondary">CSV</a>
                                 </td>
                             </tr>
-                        {% empty %}
+                            {% empty %}
                             <tr><td colspan="4" class="text-muted">No games imported yet.</td></tr>
-                        {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="4" class="text-muted">Set your Lichess username to see imported games.</td></tr>
+                        {% endif %}
                         </tbody>
                     </table>
                 </div>
+                {% if games_page and games_page.paginator.num_pages > 1 %}
+                <div class="card-footer bg-white py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    {% if games_page.has_previous %}
+                    <a class="btn btn-sm btn-outline-secondary" href="?games_page={{ games_page.previous_page_number }}">Previous</a>
+                    {% else %}
+                    <span class="btn btn-sm btn-outline-secondary disabled opacity-50" aria-disabled="true">Previous</span>
+                    {% endif %}
+                    <span class="small text-muted">Page {{ games_page.number }} of {{ games_page.paginator.num_pages }} ({{ games_page.paginator.count }} games)</span>
+                    {% if games_page.has_next %}
+                    <a class="btn btn-sm btn-outline-secondary" href="?games_page={{ games_page.next_page_number }}">Next</a>
+                    {% else %}
+                    <span class="btn btn-sm btn-outline-secondary disabled opacity-50" aria-disabled="true">Next</span>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -124,7 +143,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for row in metrics.standings %}
+                        {% for row in metrics.standings|slice:":10" %}
                             <tr>
                                 <td>{{ row.rank }}</td>
                                 <td>{{ row.name }}</td>
@@ -140,6 +159,11 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-3 py-2 border-top bg-light d-none" id="standingsPaginationWrap">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="standingsPrev" disabled>Previous</button>
+                    <span class="small text-muted" id="standingsPageInfo"></span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="standingsNext" disabled>Next</button>
                 </div>
             </div>
         </div>
@@ -281,14 +305,34 @@
         }
     }
 
+    const STANDINGS_PAGE_SIZE = 10;
+    let standingsCurrentPage = 1;
+    let cachedStandingsRows = [];
+
     function renderStandings(rows) {
+        cachedStandingsRows = Array.isArray(rows) ? rows : [];
         const tbody = document.querySelector('#standingsTable tbody');
+        const wrap = document.getElementById('standingsPaginationWrap');
+        const prevBtn = document.getElementById('standingsPrev');
+        const nextBtn = document.getElementById('standingsNext');
+        const infoEl = document.getElementById('standingsPageInfo');
+        const all = cachedStandingsRows;
+        const total = all.length;
+        const totalPages = Math.max(1, Math.ceil(total / STANDINGS_PAGE_SIZE));
+
+        if (standingsCurrentPage > totalPages) standingsCurrentPage = totalPages;
+        if (standingsCurrentPage < 1) standingsCurrentPage = 1;
+
         tbody.innerHTML = '';
-        if (!rows || !rows.length) {
+        if (!total) {
             tbody.innerHTML = '<tr><td colspan="8" class="text-muted">No standings data yet.</td></tr>';
+            if (wrap) wrap.classList.add('d-none');
             return;
         }
-        rows.forEach(row => {
+
+        const start = (standingsCurrentPage - 1) * STANDINGS_PAGE_SIZE;
+        const pageRows = all.slice(start, start + STANDINGS_PAGE_SIZE);
+        pageRows.forEach(row => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${row.rank}</td>
@@ -302,7 +346,32 @@
             `;
             tbody.appendChild(tr);
         });
+
+        if (wrap && prevBtn && nextBtn && infoEl) {
+            if (totalPages > 1) {
+                wrap.classList.remove('d-none');
+                infoEl.textContent = `Page ${standingsCurrentPage} of ${totalPages} (${total} players)`;
+                prevBtn.disabled = standingsCurrentPage <= 1;
+                nextBtn.disabled = standingsCurrentPage >= totalPages;
+            } else {
+                wrap.classList.add('d-none');
+            }
+        }
     }
+
+    document.getElementById('standingsPrev')?.addEventListener('click', () => {
+        if (standingsCurrentPage > 1) {
+            standingsCurrentPage -= 1;
+            renderStandings(cachedStandingsRows);
+        }
+    });
+    document.getElementById('standingsNext')?.addEventListener('click', () => {
+        const totalPages = Math.max(1, Math.ceil(cachedStandingsRows.length / STANDINGS_PAGE_SIZE));
+        if (standingsCurrentPage < totalPages) {
+            standingsCurrentPage += 1;
+            renderStandings(cachedStandingsRows);
+        }
+    });
 
     function renderAll(metrics) {
         renderElo(metrics.elo_progress || []);
