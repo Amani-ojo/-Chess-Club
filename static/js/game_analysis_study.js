@@ -42,11 +42,13 @@
         const cplEl = document.getElementById('studyLineCpl');
 
         function embedSrcForHalfMove(i) {
-            const base = 'https://lichess.org/embed/game/' + encodeURIComponent(gameId) + '?theme=auto&bg=auto';
-            // Lichess LPV embed reads initial ply from the URL hash only (see site.lpvEmbed.ts).
-            // i is 0-based half-move row index; ply 1 = after the first half-move on the board.
+            // LPV reads initial ply from location.hash (see lila ui/site/src/site.lpvEmbed.ts).
+            // Add a per-ply query param so each position is a distinct URL: fragments are not sent
+            // on HTTP requests, so browsers/CDNs may reuse one cached embed HTML and ignore hash
+            // changes — then the board never updates when you pick another explanation.
             const ply = Math.min(meta.length, Math.max(1, i + 1));
-            return base + '#' + ply;
+            const q = new URLSearchParams({ theme: 'auto', bg: 'auto', seek: String(ply) });
+            return 'https://lichess.org/embed/game/' + encodeURIComponent(gameId) + '?' + q.toString() + '#' + ply;
         }
 
         function pushUrl() {
@@ -89,7 +91,10 @@
                 cplEl.textContent = (m.cpl != null && Number.isFinite(Number(m.cpl))) ? Number(m.cpl).toFixed(1) : '—';
             }
 
-            iframe.src = embedSrcForHalfMove(idx);
+            const nextSrc = embedSrcForHalfMove(idx);
+            if (iframe.src !== nextSrc) {
+                iframe.src = nextSrc;
+            }
             pushUrl();
             syncNarrative();
         }
