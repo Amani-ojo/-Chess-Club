@@ -43,9 +43,10 @@
 
         function embedSrcForHalfMove(i) {
             const base = 'https://lichess.org/embed/game/' + encodeURIComponent(gameId) + '?theme=auto&bg=auto';
-            // Lichess uses 1-based ply in the game viewer; align with row index m as (m+1).
+            // Lichess LPV embed reads initial ply from the URL hash only (see site.lpvEmbed.ts).
+            // i is 0-based half-move row index; ply 1 = after the first half-move on the board.
             const ply = Math.min(meta.length, Math.max(1, i + 1));
-            return base + '&ply=' + ply;
+            return base + '#' + ply;
         }
 
         function pushUrl() {
