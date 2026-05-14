@@ -7,9 +7,10 @@
     <h2 class="mb-1">{{ game.player_white }} vs {{ game.player_black }}</h2>
     <p class="text-muted mb-4"><time datetime="{{ game.played_at|date:'c' }}">{{ game.played_at|date:"M j, Y" }} {{ game.played_at|date:"H:i" }}</time> · {{ game.time_control }} · Result: <strong>{{ game.result }}</strong></p>
     {% if analysis and analysis.status == 'completed' %}
-    <div class="mb-3 d-flex gap-2">
+    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
         <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'json' %}" class="btn btn-sm btn-outline-dark">Download JSON</a>
         <a href="{% url 'ai_pipeline:export_game_analysis' game.pk 'csv' %}" class="btn btn-sm btn-outline-dark">Download CSV</a>
+        <a href="{% url 'ai_pipeline:game_analysis_study' game.lichess_game_id|default:game.pk %}" class="btn btn-sm btn-outline-primary">Interactive study</a>
     </div>
     {% endif %}
 
@@ -71,6 +72,7 @@
                             <th>Δ (mover)</th>
                             <th>CPL</th>
                             <th>Engine note</th>
+                            <th>Board study</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,6 +119,17 @@
                                 {% else %}
                                     Solid — Δ {{ move.eval_delta_for_mover_display }}, CPL {{ move.centipawn_loss|floatformat:1 }}.
                                 {% endif %}
+                            </td>
+                            <td class="small">
+                                <a href="{% url 'ai_pipeline:game_analysis_study' game.lichess_game_id|default:game.pk %}?m={{ forloop.counter0 }}">
+                                {% if move.classification == 'blunder' or move.classification == 'mistake' or move.classification == 'inaccuracy' %}
+                                    {% if move.best_move_san %}Better try: <span class="font-monospace">{{ move.best_move_san }}</span>{% else %}Open study{% endif %}
+                                {% elif move.classification == 'best' %}
+                                    Engine best line
+                                {% else %}
+                                    View best / played
+                                {% endif %}
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
