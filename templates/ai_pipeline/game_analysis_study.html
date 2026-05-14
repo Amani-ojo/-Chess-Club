@@ -5,15 +5,30 @@
 
 {% block content %}
 <style>
+    /* Keep narrative above the sticky/embed column for hit-testing (some layouts stack context issues). */
+    #studyNarrativeColumn {
+        position: relative;
+        z-index: 2;
+        pointer-events: auto;
+    }
+    .study-move-card {
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+    }
     .study-narrative { max-height: min(70vh, 720px); overflow-y: auto; }
     .study-card-active { box-shadow: inset 0 0 0 2px #0d6efd !important; }
+    .study-engine-column { position: relative; z-index: 0; }
+    /* LPV showMoves: auto hides the move list in very narrow iframes — give enough min width + horizontal scroll on small screens. */
     .study-lichess-frame {
         width: 100%;
         max-width: 960px;
         margin: 0 auto;
+        min-width: min(100%, 560px);
         min-height: min(55vw, 520px);
+        overflow-x: auto;
     }
-    .study-lichess-frame iframe { width: 100%; height: 100%; min-height: 360px; }
+    .study-lichess-frame iframe { width: 100%; height: 100%; min-width: 520px; min-height: 360px; }
 </style>
 <div class="container-fluid my-4 px-lg-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -63,7 +78,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div class="col-lg-7 order-1 order-lg-2">
+            <div class="col-lg-7 order-1 order-lg-2 study-engine-column">
                 <div class="card border-0 shadow-sm sticky-lg-top" style="top: 1rem;">
                     <div class="card-header bg-white fw-semibold">Engine line &amp; full game</div>
                     <div class="card-body">
@@ -85,7 +100,7 @@
                             </div>
                         </div>
                         <div class="small text-muted mb-2">Full game (same embed as the game page — for context while you compare moves above)</div>
-                        <div class="ratio ratio-4x3 study-lichess-frame border rounded overflow-hidden shadow-sm">
+                        <div class="ratio ratio-4x3 study-lichess-frame border rounded shadow-sm">
                             <iframe id="studyLichessEmbed"
                                     data-lichess-id="{{ game.lichess_game_id }}"
                                     src="https://lichess.org/embed/game/{{ game.lichess_game_id }}?theme=auto&amp;bg=auto&amp;seek=1#1"
@@ -104,7 +119,7 @@
         </div>
         {% else %}
         <div class="alert alert-info mb-3">This game has no Lichess ID, so the live embed is not available. You can still read the move-by-move narrative below.</div>
-        <div class="study-narrative" style="max-height: none;">
+        <div class="study-narrative" id="studyNarrativeColumn" style="max-height: none;">
             {% for move in moves %}
             <div class="card border-0 shadow-sm mb-3 study-move-card" id="study-card-{{ forloop.counter0 }}" data-move-index="{{ forloop.counter0 }}">
                 <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">

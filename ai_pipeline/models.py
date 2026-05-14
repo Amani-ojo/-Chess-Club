@@ -199,10 +199,6 @@ class MoveEvaluation(models.Model):
                     'The position collapses after this choice. Treat it as a pattern to memorize: what signal did you miss on the previous move?'
                 )
 
-        paras.append(
-            'On the full report, use the highlighted row with this move to match the short engine note in the table. '
-            'Open Interactive study for the Lichess embed and engine line for the same half-move.'
-        )
         return paras
 
 
