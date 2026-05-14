@@ -1,6 +1,6 @@
 /**
- * Interactive study board: position before each half-move, compare played vs engine best.
- * chessboardjs requires an explicit pixel width at construction — we measure #studyBoardWrap.
+ * Study page: sync half-move index (m) with Lichess embed + engine line panel.
+ * Index m matches the analysis move table / Board study links (0 = first row).
  */
 (function () {
     'use strict';
@@ -12,157 +12,46 @@
 
     function readMeta() {
         const el = document.getElementById('study-moves-meta');
-        const pgnEl = document.getElementById('ai-pgn-source');
-        if (!el) return null;
+        if (!el) return [];
         try {
-            return {
-                moves: JSON.parse(el.textContent),
-                pgn: pgnEl ? pgnEl.textContent.trim() : ''
-            };
+            return JSON.parse(el.textContent);
         } catch (e) {
             console.warn('game_analysis_study: bad JSON', e);
-            return null;
+            return [];
         }
-    }
-
-    function fenSequenceFromPgn(pgn) {
-        const fens = [];
-        const replay = new Chess();
-        fens.push(replay.fen());
-        if (!pgn) return fens;
-        const loader = new Chess();
-        let history;
-        try {
-            if (!loader.load_pgn(pgn, { sloppy: true })) return fens;
-            history = loader.history({ verbose: true });
-        } catch (e) {
-            return fens;
-        }
-        for (const move of history) {
-            replay.move(move);
-            fens.push(replay.fen());
-        }
-        return fens;
-    }
-
-    function sanToSquares(fen, san) {
-        try {
-            const c = new Chess(fen);
-            const mv = c.move(san, { sloppy: true });
-            return mv ? { from: mv.from, to: mv.to } : null;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function measureBoardPixels() {
-        const wrap = document.getElementById('studyBoardWrap');
-        if (!wrap) return 400;
-        const r = wrap.getBoundingClientRect();
-        let side = Math.floor(Math.min(r.width, r.height));
-        if (!Number.isFinite(side) || side < 100) {
-            side = Math.floor(wrap.clientWidth || 0);
-        }
-        if (!Number.isFinite(side) || side < 100) {
-            side = 400;
-        }
-        return Math.max(260, Math.min(560, side));
-    }
-
-    function clearHighlights(boardId) {
-        $('#' + boardId + ' *').removeClass(
-            'study-hl-played-from study-hl-played-to study-hl-best-from study-hl-best-to'
-        );
     }
 
     ready(function () {
-        if (typeof Chess === 'undefined' || typeof Chessboard === 'undefined') {
-            console.warn('game_analysis_study: Chess or Chessboard missing');
-            return;
-        }
-        const data = readMeta();
-        if (!data || !data.moves.length) return;
+        const iframe = document.getElementById('studyLichessEmbed');
+        const gameId = iframe && iframe.dataset ? iframe.dataset.lichessId : '';
+        const meta = readMeta();
+        if (!iframe || !gameId || !meta.length) return;
 
-        const fens = fenSequenceFromPgn(data.pgn);
-        const boardId = 'studyBoard';
         let idx = 0;
-        let board = null;
-
         const params = new URLSearchParams(window.location.search);
         const qm = parseInt(params.get('m'), 10);
-        if (Number.isFinite(qm) && qm >= 0 && qm < data.moves.length) {
+        if (Number.isFinite(qm) && qm >= 0 && qm < meta.length) {
             idx = qm;
         }
 
-        const meta = data.moves;
         const labelEl = document.getElementById('studyPositionLabel');
-        const hintEl = document.getElementById('studyToggleHint');
-        const showPlayed = document.getElementById('studyShowPlayed');
-        const showBest = document.getElementById('studyShowBest');
+        const idxEl = document.getElementById('studyLineIndex');
+        const playedEl = document.getElementById('studyLinePlayed');
+        const bestEl = document.getElementById('studyLineBest');
+        const evalEl = document.getElementById('studyLineEval');
+        const cplEl = document.getElementById('studyLineCpl');
 
-        function buildBoard() {
-            const w = measureBoardPixels();
-            if (board) {
-                try {
-                    board.destroy();
-                } catch (e) { /* ignore */ }
-                board = null;
-            }
-            $('#' + boardId).empty();
-            board = Chessboard(boardId, {
-                position: fens[0] || 'start',
-                draggable: false,
-                width: w,
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-                showNotation: true,
-            });
+        function embedSrcForHalfMove(i) {
+            const base = 'https://lichess.org/embed/game/' + encodeURIComponent(gameId) + '?theme=auto&bg=auto';
+            // Lichess uses 1-based ply in the game viewer; align with row index m as (m+1).
+            const ply = Math.min(meta.length, Math.max(1, i + 1));
+            return base + '&ply=' + ply;
         }
 
-        function currentFen() {
-            return fens[idx] || fens[0] || 'start';
-        }
-
-        function currentMove() {
-            return meta[idx] || meta[0];
-        }
-
-        function updateToggleUi() {
-            const m = currentMove();
-            const best = (m.best || '').trim();
-            const same = !best || best === m.san;
-            const wrap = document.getElementById('studyToggleWrap');
-            if (wrap) {
-                wrap.style.display = same ? 'none' : '';
-            }
-            if (hintEl) {
-                hintEl.textContent = same
-                    ? 'Engine matches the played move — highlights show that continuation.'
-                    : 'Red: played move from this position. Green: engine’s strongest alternative.';
-            }
-            if (same && showPlayed) {
-                showPlayed.checked = true;
-            }
-        }
-
-        function applyHighlights() {
-            if (!board) return;
-            clearHighlights(boardId);
-            const fen = currentFen();
-            const m = currentMove();
-            const played = sanToSquares(fen, m.san);
-            const bestSan = (m.best || '').trim();
-            const best = bestSan && bestSan !== m.san ? sanToSquares(fen, bestSan) : null;
-            const preferEngine = showBest && showBest.checked && best;
-
-            setTimeout(() => {
-                if (preferEngine && best) {
-                    $('#' + boardId + ' .square-' + best.from).addClass('study-hl-best-from');
-                    $('#' + boardId + ' .square-' + best.to).addClass('study-hl-best-to');
-                } else if (played) {
-                    $('#' + boardId + ' .square-' + played.from).addClass('study-hl-played-from');
-                    $('#' + boardId + ' .square-' + played.to).addClass('study-hl-played-to');
-                }
-            }, 80);
+        function pushUrl() {
+            const u = new URL(window.location.href);
+            u.searchParams.set('m', String(idx));
+            window.history.replaceState({}, '', u);
         }
 
         function syncNarrative() {
@@ -175,44 +64,33 @@
         }
 
         function render() {
-            if (!board) return;
-            const fen = currentFen();
-            const m = currentMove();
+            const m = meta[idx];
             const side = m.white ? 'White' : 'Black';
-            board.orientation(m.white ? 'white' : 'black');
-            board.position(fen);
             if (labelEl) {
-                labelEl.textContent = 'Position before ' + side + "'s " + (m.ply || '') + ' ' + (m.san || '') +
-                    ' (half-move ' + (idx + 1) + ' of ' + meta.length + ')';
+                labelEl.textContent = 'Half-move ' + (idx + 1) + ' of ' + meta.length + ' — ' + side + ' to play ' +
+                    (m.ply || '') + ' ' + (m.san || '');
             }
-            updateToggleUi();
-            applyHighlights();
+            if (idxEl) idxEl.textContent = String(idx) + ' (same as ?m= on the full report)';
+
+            const played = (m.san || '—').trim() || '—';
+            const bestRaw = (m.best || '').trim();
+            const best = bestRaw && bestRaw !== played ? bestRaw : (bestRaw || '—');
+            if (playedEl) playedEl.textContent = played;
+            if (bestEl) {
+                bestEl.textContent = best;
+                bestEl.classList.toggle('text-success', !!(bestRaw && bestRaw !== played));
+                bestEl.classList.toggle('text-muted', !bestRaw || bestRaw === played);
+            }
+            if (evalEl) {
+                evalEl.textContent = (m.evalBefore || '—') + ' → ' + (m.evalAfter || '—');
+            }
+            if (cplEl) {
+                cplEl.textContent = (m.cpl != null && Number.isFinite(Number(m.cpl))) ? Number(m.cpl).toFixed(1) : '—';
+            }
+
+            iframe.src = embedSrcForHalfMove(idx);
+            pushUrl();
             syncNarrative();
-        }
-
-        let lastMeasured = 0;
-
-        function relayoutBoard() {
-            buildBoard();
-            render();
-        }
-
-        let resizeT;
-        function onResize() {
-            clearTimeout(resizeT);
-            resizeT = setTimeout(() => {
-                const w = measureBoardPixels();
-                if (Math.abs(w - lastMeasured) < 12) return;
-                lastMeasured = w;
-                relayoutBoard();
-            }, 150);
-        }
-
-        function start() {
-            lastMeasured = measureBoardPixels();
-            buildBoard();
-            render();
-            window.addEventListener('resize', onResize);
         }
 
         document.getElementById('studyBtnPrev')?.addEventListener('click', () => {
@@ -228,25 +106,16 @@
             }
         });
 
-        showPlayed?.addEventListener('change', () => { if (showPlayed.checked) applyHighlights(); });
-        showBest?.addEventListener('change', () => { if (showBest.checked) applyHighlights(); });
-
         document.querySelectorAll('.study-move-card').forEach((card) => {
             card.addEventListener('click', () => {
                 const i = parseInt(card.getAttribute('data-move-index'), 10);
-                if (Number.isFinite(i)) {
+                if (Number.isFinite(i) && i >= 0 && i < meta.length) {
                     idx = i;
                     render();
                 }
             });
         });
 
-        requestAnimationFrame(() => {
-            requestAnimationFrame(start);
-        });
-        window.addEventListener('load', () => {
-            if (!board || !document.getElementById(boardId)) return;
-            onResize();
-        });
+        render();
     });
 })();
