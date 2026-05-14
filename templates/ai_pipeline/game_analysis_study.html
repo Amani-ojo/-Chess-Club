@@ -122,7 +122,7 @@
         </div>
         {% endif %}
 
-        <script id="study-moves-meta" type="application/json">[{% for move in moves %}{"i":{{ forloop.counter0 }},"ply":"{{ move.ply_label|escapejs }}","san":"{{ move.move_san|escapejs }}","best":"{{ move.best_move_san|escapejs }}","white":{{ move.is_white|yesno:"true,false" }},"cls":"{{ move.classification|escapejs }}","evalBefore":"{{ move.eval_before_display|escapejs }}","evalAfter":"{{ move.eval_after_display|escapejs }}","cpl":{{ move.centipawn_loss|default_if_none:"null" }}}{% if not forloop.last %},{% endif %}{% endfor %}]</script>
+        <script id="study-moves-meta" type="application/json">{{ study_moves_json|safe }}</script>
         {% if game.lichess_game_id %}
         <script src="{% static 'js/game_analysis_study.js' %}"></script>
         {% endif %}

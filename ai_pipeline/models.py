@@ -200,7 +200,8 @@ class MoveEvaluation(models.Model):
                 )
 
         paras.append(
-            'Use the board on the right: compare your move with the engine suggestion from the same position, then step forward when you are ready.'
+            'On the full report, use the highlighted row with this move to match the short engine note in the table. '
+            'Open Interactive study for the Lichess embed and engine line for the same half-move.'
         )
         return paras
 

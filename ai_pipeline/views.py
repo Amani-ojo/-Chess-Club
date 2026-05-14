@@ -11,6 +11,30 @@ from club.models import Member
 from .models import Game
 
 
+def _study_move_meta_list(moves):
+    """Build JSON-serializable rows for the interactive study script."""
+    rows = []
+    for i, m in enumerate(moves):
+        try:
+            cpl = float(m.centipawn_loss) if m.centipawn_loss is not None else None
+        except (TypeError, ValueError):
+            cpl = None
+        rows.append(
+            {
+                'i': i,
+                'ply': m.ply_label,
+                'san': m.move_san or '',
+                'best': (m.best_move_san or '').strip(),
+                'white': bool(m.is_white),
+                'cls': m.classification or '',
+                'evalBefore': m.eval_before_display,
+                'evalAfter': m.eval_after_display,
+                'cpl': cpl,
+            }
+        )
+    return rows
+
+
 def _resolve_game(game_id, prefetch_analysis_moves=False):
     game_id = str(game_id).strip()
     query = Q(lichess_game_id=game_id)
@@ -115,10 +139,13 @@ def game_analysis_view(request, game_id):
 
 @login_required
 def game_analysis_study_view(request, game_id):
+    ctx = _game_analysis_render_context(request, game_id)
+    moves = list(ctx.get('moves') or [])
+    ctx['study_moves_json'] = json.dumps(_study_move_meta_list(moves))
     return render(
         request,
         'ai_pipeline/game_analysis_study.html',
-        _game_analysis_render_context(request, game_id),
+        ctx,
     )
 
 
