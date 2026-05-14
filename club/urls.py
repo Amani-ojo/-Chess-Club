@@ -1,3 +1,4 @@
+feature/stockfish-analysis-improvements
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
@@ -52,4 +53,16 @@ urlpatterns = [
     ),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('dashboard/metrics/', views.dashboard_metrics_api, name='dashboard_metrics'),
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('leaderboard/', views.leaderboard, name='leaderboard'),
+    path('matches/', views.matches, name='matches'),
+    path('matches/<int:pk>/', views.match_detail, name='match_detail'),
+    path('members/<int:pk>/', views.member_profile, name='member_profile'),
+    path('about/', views.about, name='about'),
+develop
 ]

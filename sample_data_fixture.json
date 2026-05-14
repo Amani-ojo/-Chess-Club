@@ -1,0 +1,154 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 100,
+    "fields": {
+      "username": "lukas",
+      "first_name": "Lukas",
+      "last_name": "Fehr",
+      "email": "lukas@eschenchess.li",
+      "password": "pbkdf2_sha256$720000$placeholder$placeholder==",
+      "is_active": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 101,
+    "fields": {
+      "username": "anna",
+      "first_name": "Anna",
+      "last_name": "Büchel",
+      "email": "anna@eschenchess.li",
+      "password": "pbkdf2_sha256$720000$placeholder$placeholder==",
+      "is_active": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 102,
+    "fields": {
+      "username": "marco",
+      "first_name": "Marco",
+      "last_name": "Ospelt",
+      "email": "marco@eschenchess.li",
+      "password": "pbkdf2_sha256$720000$placeholder$placeholder==",
+      "is_active": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 103,
+    "fields": {
+      "username": "elena",
+      "first_name": "Elena",
+      "last_name": "Hasler",
+      "email": "elena@eschenchess.li",
+      "password": "pbkdf2_sha256$720000$placeholder$placeholder==",
+      "is_active": true
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 104,
+    "fields": {
+      "username": "noah",
+      "first_name": "Noah",
+      "last_name": "Wanger",
+      "email": "noah@eschenchess.li",
+      "password": "pbkdf2_sha256$720000$placeholder$placeholder==",
+      "is_active": true
+    }
+  },
+  {
+    "model": "club.member",
+    "pk": 100,
+    "fields": {
+      "user": 100,
+      "display_name": "Lukas Fehr",
+      "elo_rating": 1850,
+      "wins": 42,
+      "losses": 18,
+      "draws": 10,
+      "joined_date": "2024-01-01",
+      "is_active": true
+    }
+  },
+  {
+    "model": "club.member",
+    "pk": 101,
+    "fields": {
+      "user": 101,
+      "display_name": "Anna Büchel",
+      "elo_rating": 1720,
+      "wins": 35,
+      "losses": 22,
+      "draws": 8,
+      "joined_date": "2024-01-16",
+      "is_active": true
+    }
+  },
+  {
+    "model": "club.member",
+    "pk": 102,
+    "fields": {
+      "user": 102,
+      "display_name": "Marco Ospelt",
+      "elo_rating": 1650,
+      "wins": 28,
+      "losses": 25,
+      "draws": 12,
+      "joined_date": "2024-01-31",
+      "is_active": true
+    }
+  },
+  {
+    "model": "club.member",
+    "pk": 103,
+    "fields": {
+      "user": 103,
+      "display_name": "Elena Hasler",
+      "elo_rating": 1580,
+      "wins": 20,
+      "losses": 20,
+      "draws": 15,
+      "joined_date": "2024-02-15",
+      "is_active": true
+    }
+  },
+  {
+    "model": "club.member",
+    "pk": 104,
+    "fields": {
+      "user": 104,
+      "display_name": "Noah Wanger",
+      "elo_rating": 1510,
+      "wins": 18,
+      "losses": 22,
+      "draws": 5,
+      "joined_date": "2024-03-01",
+      "is_active": true
+    }
+  },
+  {
+    "model": "club.announcement",
+    "pk": 100,
+    "fields": {
+      "title": "Welcome to the Eschen Chess Club Website!",
+      "body": "We are excited to launch our new website. Here you can track your ELO rating, view upcoming matches, and stay up to date with club news.",
+      "published_at": "2026-02-01T12:00:00Z",
+      "is_published": true,
+      "author": 100
+    }
+  },
+  {
+    "model": "club.announcement",
+    "pk": 101,
+    "fields": {
+      "title": "Spring Tournament 2026 — Registration Open",
+      "body": "Our annual Spring Tournament is coming up on April 19th. All club members are welcome. Register by April 12th. Format: Swiss system, 7 rounds, 15+10.",
+      "published_at": "2026-03-20T10:00:00Z",
+      "is_published": true,
+      "author": 100
+    }
+  }
+]

@@ -10,7 +10,6 @@ from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 _SECRET_DEFAULT = 'django-insecure-dev-only-change-me'
 SECRET_KEY = config('SECRET_KEY', default=_SECRET_DEFAULT)
 DEBUG = config('DEBUG', default=True, cast=bool)
@@ -35,6 +34,27 @@ if not DEBUG:
 
 _csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='')
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
+=======
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-7o7pt9o84%k7km1xl$rf&e&&9_d^%1q-*!zqv795wz^9)uep^k',
+)
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
+
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if h.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+    if o.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -56,9 +76,14 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'rest_framework',
     'drf_spectacular',
+    'crispy_forms',
+    'crispy_bootstrap5',
     'club',
     'ai_pipeline',
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -164,6 +189,11 @@ else:
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
+# Database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.environ.get('DJANGO_DATABASE_PATH', BASE_DIR / 'db.sqlite3'),
     }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -186,8 +216,19 @@ STORAGES = {
     'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
 }
 
+# WhiteNoise compressed + hashed static files for production
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+# Media files (user uploads like avatars)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(os.environ.get('DJANGO_MEDIA_ROOT', BASE_DIR / 'media'))
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
@@ -222,7 +263,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 LOGIN_URL = 'club:login'
 LOGIN_REDIRECT_URL = 'club:dashboard'
 LOGOUT_REDIRECT_URL = 'club:home'
@@ -315,3 +355,12 @@ LOGGING = {
         },
     },
 }
+# Security hardening (only applied when DEBUG is off)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True

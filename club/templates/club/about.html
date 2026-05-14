@@ -1,0 +1,72 @@
+{% extends 'club/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}About — Eschen Chess Club{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="bi bi-info-circle"></i> About Us</h1>
+        <p class="text-muted">Learn more about the Eschen Chess Club</p>
+    </div>
+</section>
+
+<section class="section-block">
+    <div class="container">
+        <div class="row">
+
+            <!-- Left column: Club info -->
+            <div class="col-lg-7 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3>Our Story</h3>
+                        <p>
+                            The Eschen Chess Club brings together chess enthusiasts of all skill levels
+                            in the village of Eschen, Liechtenstein. Whether you are a seasoned player
+                            or just learning the game, our doors are open.
+                        </p>
+                        <p>
+                            We meet regularly for friendly games, structured tournaments, and coaching
+                            sessions. Our ELO rating system tracks performance so members can see
+                            their progress over time.
+                        </p>
+
+                        <hr>
+
+                        <h5><i class="bi bi-clock"></i> Meeting Times</h5>
+                        <p>Tuesdays and Thursdays, 18:00 — 21:00</p>
+
+                        <h5><i class="bi bi-geo-alt"></i> Location</h5>
+                        <p>Eschen Dorfplatz, 9492 Eschen, Liechtenstein</p>
+
+                        <h5><i class="bi bi-people"></i> Membership</h5>
+                        <p>
+                            Membership is open to everyone. Contact us using the form or
+                            drop by during our meeting hours.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: Contact form -->
+            <div class="col-lg-5 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-envelope"></i> Contact Us</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <button type="submit" class="btn btn-primary w-100 mt-3">
+                                <i class="bi bi-send"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
