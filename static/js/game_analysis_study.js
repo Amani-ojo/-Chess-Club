@@ -1,5 +1,6 @@
 /**
  * Interactive study board: position before each half-move, compare played vs engine best.
+ * chessboardjs requires an explicit pixel width at construction — we measure #studyBoardWrap.
  */
 (function () {
     'use strict';
@@ -54,20 +55,38 @@
         }
     }
 
+    function measureBoardPixels() {
+        const wrap = document.getElementById('studyBoardWrap');
+        if (!wrap) return 400;
+        const r = wrap.getBoundingClientRect();
+        let side = Math.floor(Math.min(r.width, r.height));
+        if (!Number.isFinite(side) || side < 100) {
+            side = Math.floor(wrap.clientWidth || 0);
+        }
+        if (!Number.isFinite(side) || side < 100) {
+            side = 400;
+        }
+        return Math.max(260, Math.min(560, side));
+    }
+
     function clearHighlights(boardId) {
-        $('#' + boardId + ' [class^="square-"]').removeClass(
+        $('#' + boardId + ' *').removeClass(
             'study-hl-played-from study-hl-played-to study-hl-best-from study-hl-best-to'
         );
     }
 
     ready(function () {
-        if (typeof Chess === 'undefined' || typeof Chessboard === 'undefined') return;
+        if (typeof Chess === 'undefined' || typeof Chessboard === 'undefined') {
+            console.warn('game_analysis_study: Chess or Chessboard missing');
+            return;
+        }
         const data = readMeta();
         if (!data || !data.moves.length) return;
 
         const fens = fenSequenceFromPgn(data.pgn);
         const boardId = 'studyBoard';
         let idx = 0;
+        let board = null;
 
         const params = new URLSearchParams(window.location.search);
         const qm = parseInt(params.get('m'), 10);
@@ -81,12 +100,23 @@
         const showPlayed = document.getElementById('studyShowPlayed');
         const showBest = document.getElementById('studyShowBest');
 
-        const board = Chessboard(boardId, {
-            position: fens[0] || 'start',
-            draggable: false,
-            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-            showNotation: true,
-        });
+        function buildBoard() {
+            const w = measureBoardPixels();
+            if (board) {
+                try {
+                    board.destroy();
+                } catch (e) { /* ignore */ }
+                board = null;
+            }
+            $('#' + boardId).empty();
+            board = Chessboard(boardId, {
+                position: fens[0] || 'start',
+                draggable: false,
+                width: w,
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+                showNotation: true,
+            });
+        }
 
         function currentFen() {
             return fens[idx] || fens[0] || 'start';
@@ -115,6 +145,7 @@
         }
 
         function applyHighlights() {
+            if (!board) return;
             clearHighlights(boardId);
             const fen = currentFen();
             const m = currentMove();
@@ -131,7 +162,7 @@
                     $('#' + boardId + ' .square-' + played.from).addClass('study-hl-played-from');
                     $('#' + boardId + ' .square-' + played.to).addClass('study-hl-played-to');
                 }
-            }, 60);
+            }, 80);
         }
 
         function syncNarrative() {
@@ -144,6 +175,7 @@
         }
 
         function render() {
+            if (!board) return;
             const fen = currentFen();
             const m = currentMove();
             const side = m.white ? 'White' : 'Black';
@@ -156,6 +188,31 @@
             updateToggleUi();
             applyHighlights();
             syncNarrative();
+        }
+
+        let lastMeasured = 0;
+
+        function relayoutBoard() {
+            buildBoard();
+            render();
+        }
+
+        let resizeT;
+        function onResize() {
+            clearTimeout(resizeT);
+            resizeT = setTimeout(() => {
+                const w = measureBoardPixels();
+                if (Math.abs(w - lastMeasured) < 12) return;
+                lastMeasured = w;
+                relayoutBoard();
+            }, 150);
+        }
+
+        function start() {
+            lastMeasured = measureBoardPixels();
+            buildBoard();
+            render();
+            window.addEventListener('resize', onResize);
         }
 
         document.getElementById('studyBtnPrev')?.addEventListener('click', () => {
@@ -184,6 +241,12 @@
             });
         });
 
-        render();
+        requestAnimationFrame(() => {
+            requestAnimationFrame(start);
+        });
+        window.addEventListener('load', () => {
+            if (!board || !document.getElementById(boardId)) return;
+            onResize();
+        });
     });
 })();

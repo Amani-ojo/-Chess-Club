@@ -12,7 +12,20 @@
     .study-hl-played-to { box-shadow: inset 0 0 0 3px #dc3545 !important; background-color: rgba(245,194,199,.45) !important; }
     .study-hl-best-from { box-shadow: inset 0 0 0 3px rgba(25,135,84,.55) !important; }
     .study-hl-best-to { box-shadow: inset 0 0 0 3px #198754 !important; background-color: rgba(163,207,187,.45) !important; }
-    #studyBoard { max-width: 420px; margin: 0 auto; }
+    /* chessboardjs needs a real pixel width before init — outer box defines layout */
+    .study-board-wrap {
+        width: 100%;
+        max-width: 560px;
+        min-width: 260px;
+        margin-left: auto;
+        margin-right: auto;
+        aspect-ratio: 1 / 1;
+        min-height: 260px;
+        background: linear-gradient(145deg, #f0f0f0, #e8e4dc);
+        border: 1px solid rgba(0,0,0,.12);
+    }
+    .study-board-inner { width: 100%; height: 100%; min-height: 240px; }
+    .study-lichess-frame { max-width: 560px; margin: 0 auto; }
 </style>
 <div class="container-fluid my-4 px-lg-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -39,7 +52,8 @@
         <div class="alert alert-danger"><strong>Analysis failed.</strong> {{ analysis.error_message }}</div>
     {% else %}
         <p class="small text-muted border-start border-3 border-primary ps-2 mb-3">
-            Narrative on the left explains each half-move. The board shows the position <strong>before</strong> that move; use the toggle to compare your move with the engine line, then use Previous / Next to walk through the game.
+            Narrative on the left explains each half-move. The <strong>engine study board</strong> shows the position before that move with played vs best highlights.
+            {% if game.lichess_game_id %}Below it, the <strong>Lichess embed</strong> matches the game embed page for a full interactive replay in parallel.{% endif %}
         </p>
         <div class="row g-4">
             <div class="col-lg-5 order-2 order-lg-1">
@@ -62,10 +76,28 @@
             </div>
             <div class="col-lg-7 order-1 order-lg-2">
                 <div class="card border-0 shadow-sm sticky-lg-top" style="top: 1rem;">
-                    <div class="card-header bg-white fw-semibold">Board</div>
+                    <div class="card-header bg-white fw-semibold d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <span>Engine study board</span>
+                        {% if game.lichess_game_id %}
+                        <a href="https://lichess.org/{{ game.lichess_game_id }}" target="_blank" rel="noopener" class="small">Open on Lichess <i class="bi bi-box-arrow-up-right"></i></a>
+                        {% endif %}
+                    </div>
                     <div class="card-body">
                         <p class="small text-muted mb-2" id="studyPositionLabel"></p>
-                        <div id="studyBoard"></div>
+                        <div id="studyBoardWrap" class="study-board-wrap p-2 p-md-3 mb-3">
+                            <div id="studyBoard" class="study-board-inner"></div>
+                        </div>
+                        {% if game.lichess_game_id %}
+                        <div class="mb-3">
+                            <div class="small text-muted mb-1">Full game (same embed as the game page — for context while you compare moves above)</div>
+                            <div class="ratio ratio-4x3 study-lichess-frame border rounded overflow-hidden shadow-sm">
+                                <iframe id="studyLichessEmbed"
+                                        src="https://lichess.org/embed/game/{{ game.lichess_game_id }}?theme=brown&bg=auto"
+                                        class="border-0"
+                                        title="Lichess game {{ game.lichess_game_id }}"></iframe>
+                            </div>
+                        </div>
+                        {% endif %}
                         <div class="d-flex flex-wrap justify-content-center gap-2 align-items-center mt-3">
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="studyBtnPrev">Previous</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="studyBtnNext">Next</button>
