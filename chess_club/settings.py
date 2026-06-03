@@ -2,20 +2,20 @@
 Django settings for chess_club project.
 """
 
+import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7o7pt9o84%k7km1xl$rf&e&&9_d^%1q-*!zqv795wz^9)uep^k'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-7o7pt9o84%k7km1xl$rf&e&&9_d^%1q-*!zqv795wz^9)uep^k',
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else []
 
-# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'club',
+    'ai_pipeline',
 ]
 
 MIDDLEWARE = [
@@ -88,3 +89,21 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Celery ────────────────────────────────────────────────────────────────────
+CELERY_BROKER_URL             = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND         = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT         = ['json']
+CELERY_TASK_SERIALIZER        = 'json'
+CELERY_RESULT_SERIALIZER      = 'json'
+CELERY_TIMEZONE               = 'UTC'
+
+# ── Lichess API ───────────────────────────────────────────────────────────────
+LICHESS_API_TOKEN    = os.environ.get('LICHESS_API_TOKEN', '')
+LICHESS_API_BASE_URL = 'https://lichess.org/api'
+
+# ── Stockfish ─────────────────────────────────────────────────────────────────
+STOCKFISH_PATH    = os.environ.get('STOCKFISH_PATH', '/usr/local/bin/stockfish')
+STOCKFISH_DEPTH   = int(os.environ.get('STOCKFISH_DEPTH', 20))
+STOCKFISH_THREADS = int(os.environ.get('STOCKFISH_THREADS', 2))
+STOCKFISH_HASH_MB = int(os.environ.get('STOCKFISH_HASH_MB', 256))

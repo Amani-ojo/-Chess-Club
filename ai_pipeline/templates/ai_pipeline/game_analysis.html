@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis — {{ game.player_white }} vs {{ game.player_black }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'ai_pipeline:game_embed' game.pk %}">Game</a></li>
+            <li class="breadcrumb-item active">Stockfish Analysis</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-1">{{ game.player_white }} vs {{ game.player_black }}</h2>
+    <p class="text-muted mb-4">
+        {{ game.played_at|date:"F j, Y H:i" }} &middot; {{ game.time_control }} &middot; Result: <strong>{{ game.result }}</strong>
+    </p>
+
+    {% if not analysis %}
+        <div class="alert alert-warning">
+            No analysis found for this game. It may still be queued for processing.
+        </div>
+
+    {% elif analysis.status == 'pending' or analysis.status == 'processing' %}
+        <div class="alert alert-info d-flex align-items-center gap-2">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            Analysis is currently <strong>{{ analysis.get_status_display }}</strong>. Refresh the page in a moment.
+        </div>
+
+    {% elif analysis.status == 'failed' %}
+        <div class="alert alert-danger">
+            <strong>Analysis failed.</strong>
+            {% if analysis.error_message %}
+                <pre class="mt-2 mb-0 small">{{ analysis.error_message }}</pre>
+            {% endif %}
+        </div>
+
+    {% else %}
+        {# ── Summary cards ─────────────────────────────────────────── #}
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted small">White Avg CPL</div>
+                        <div class="fs-3 fw-bold text-primary">{{ analysis.white_avg_centipawn_loss|floatformat:1 }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted small">Black Avg CPL</div>
+                        <div class="fs-3 fw-bold text-dark">{{ analysis.black_avg_centipawn_loss|floatformat:1 }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted small">White Blunders / Mistakes</div>
+                        <div class="fs-3 fw-bold text-danger">{{ analysis.white_blunders }}</div>
+                        <div class="small text-warning">{{ analysis.white_mistakes }} mistake(s)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card text-center h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="text-muted small">Black Blunders / Mistakes</div>
+                        <div class="fs-3 fw-bold text-danger">{{ analysis.black_blunders }}</div>
+                        <div class="small text-warning">{{ analysis.black_mistakes }} mistake(s)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Move-by-move table ────────────────────────────────────── #}
+        {% if moves %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold">Move-by-Move Evaluation</div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Side</th>
+                            <th>Move</th>
+                            <th>Best Move</th>
+                            <th>CPL</th>
+                            <th>Classification</th>
+                            <th>Eval Before</th>
+                            <th>Eval After</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for move in moves %}
+                        <tr class="
+                            {% if move.classification == 'blunder' %}table-danger
+                            {% elif move.classification == 'mistake' %}table-warning
+                            {% elif move.classification == 'inaccuracy' %}table-info
+                            {% elif move.classification == 'best' or move.classification == 'excellent' %}table-success
+                            {% endif %}
+                        ">
+                            <td>{{ move.move_number }}</td>
+                            <td>{% if move.is_white %}&#9822; White{% else %}&#9823; Black{% endif %}</td>
+                            <td><strong>{{ move.move_san }}</strong></td>
+                            <td class="text-muted">{{ move.best_move_san|default:"—" }}</td>
+                            <td>{{ move.centipawn_loss|floatformat:1 }}</td>
+                            <td>
+                                <span class="badge
+                                    {% if move.classification == 'blunder' %}bg-danger
+                                    {% elif move.classification == 'mistake' %}bg-warning text-dark
+                                    {% elif move.classification == 'inaccuracy' %}bg-info text-dark
+                                    {% elif move.classification == 'best' %}bg-success
+                                    {% elif move.classification == 'excellent' %}bg-success
+                                    {% else %}bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ move.get_classification_display }}
+                                </span>
+                            </td>
+                            <td>{{ move.eval_before|floatformat:1 }}</td>
+                            <td>{{ move.eval_after|floatformat:1 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+            <p class="text-muted">No move evaluations recorded.</p>
+        {% endif %}
+
+        <p class="text-muted small mt-3">
+            Analysed at {{ analysis.analysed_at|date:"F j, Y H:i" }} &middot; Depth {{ analysis.depth }}
+        </p>
+    {% endif %}
+
+</div>
+{% endblock %}

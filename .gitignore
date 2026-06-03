@@ -29,3 +29,17 @@ Thumbs.db
 *.egg-info/
 dist/
 build/
+
+# Test artifacts
+.pytest_cache/
+test_report.html
+
+# Stockfish binary (too large for git — download separately)
+bin/
+**/stockfish_extracted/
+*.exe
+*.zip
+
+# Secrets
+.env
+*.env.*

@@ -1,8 +1,8 @@
 # ChessMate — AI Pipeline: Features, Explanation & Integration Guide
 
-**Author:** Gen Millinkan - Gupta  
+**Author:** Patrick Gupta  
 **Branch:** `feature/ai-pipeline`  
-**Date:** 15 April 2026  
+**Date:** 4 April 2026  
 **Test status:** 27 / 27 passing
 
 ---
@@ -239,4 +239,9 @@ stockfish>=3.28
 ```
 
 ---
-For further details contact  : genmillinkan@gmail.com
+
+## 7. Notes
+
+- The `ai_pipeline` app references `club.models.Member` via `ForeignKey` only — it never modifies any `club` models.
+- Do not commit `LICHESS_API_TOKEN` to git. Use environment variables or a `.env` file with `python-decouple` or `django-environ`.
+- The Stockfish binary (`bin/stockfish_extracted/`) must be present on the server. The Windows AVX2 build is included for local development; replace with the Linux build for deployment.
